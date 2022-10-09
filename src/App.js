@@ -17,7 +17,7 @@ import {
   WagmiConfig,
 } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ethers } from "ethers";
 const { chains, provider } = configureChains(
   [chain.mainnet],
@@ -151,8 +151,18 @@ function Page() {
     setDonate(!donate);
   };
 
+  useEffect(() => {
+    if (!donate && amount > 3) {
+      setAmount(3);
+    }
+  }, [donate, amount]);
+
   const handleSetAmount = (ev) => {
-    setAmount(ev.target.value);
+    let amount = parseInt(ev.target.value, 10);
+    if (!amount || amount <= 0) {
+      amount = 1;
+    }
+    setAmount(amount);
   };
 
   const handleSetTerm = (ev) => {
