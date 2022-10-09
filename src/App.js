@@ -98,6 +98,7 @@ function MintedList() {
   });
 
   const userAddresses = useMemo(() => {
+    if (!userCreateCount) return [];
     const userCreateCountNum = userCreateCount.toNumber();
     if (userCreateCountNum == 0) return [];
     const addresses = [];
