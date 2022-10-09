@@ -1,14 +1,15 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import "./styles.css";
 import "@rainbow-me/rainbowkit/styles.css";
-
+import "./typechain-types/factories/src/XenWitch__factory";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import {
   chain,
   configureChains,
   createClient,
   useAccount,
-  WagmiConfig
+  useProvider,
+  WagmiConfig,
 } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { useMemo } from "react";
@@ -19,13 +20,13 @@ const { chains, provider } = configureChains(
 
 const { connectors } = getDefaultWallets({
   appName: "BoxMrChen Xen Tool",
-  chains
+  chains,
 });
 
 const wagmiClient = createClient({
   autoConnect: true,
   connectors,
-  provider
+  provider,
 });
 export default function App() {
   return (
@@ -41,12 +42,14 @@ const contractAddress = "0x758d135f940189A7a06265e3827ED104d91D1646";
 
 function Page() {
   const { address } = useAccount();
+  const provider = useProvider();
   const params = new URLSearchParams(window.location.search);
   const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
 
   const contract = useMemo(() => {
-    if (!address) return null;
-  }, [address]);
+    if (!address || !provider) return null;
+    return XenWitch__factory.connect();
+  }, [address, provider]);
   return (
     <div className="App">
       <div className="big-text">https://twitter.com/BoxMrChen</div>
