@@ -1,18 +1,20 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import "./styles.css";
 import "@rainbow-me/rainbowkit/styles.css";
-import "./typechain-types/factories/src/XenWitch__factory";
+import { XenWitchInterface } from "./XenWitch";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import {
   chain,
   configureChains,
   createClient,
   useAccount,
+  useContractRead,
   useProvider,
   WagmiConfig,
 } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { ethers } from "ethers";
 const { chains, provider } = configureChains(
   [chain.mainnet],
   [publicProvider()]
@@ -48,8 +50,30 @@ function Page() {
 
   const contract = useMemo(() => {
     if (!address || !provider) return null;
-    return XenWitch__factory.connect();
+    return new ethers.Contract(contractAddress, XenWitchInterface, provider);
   }, [address, provider]);
+
+  const [amount, setAmount] = useState(10);
+  const [term, setTerm] = useState(0);
+
+  const handleSetAmount = (ev) => {
+    setAmount(ev.target.value);
+  };
+
+  const handleSetTerm = (ev) => {
+    setTerm(ev.target.value);
+  };
+
+  const { data } = useContractRead({
+    addressOrName: contractAddress,
+    contractInterface: XenWitchInterface,
+    functionName: "minDonate",
+  });
+
+  const allReady = useMemo(() => {
+    console.log(data);
+    return data !== undefined && address && contract;
+  }, [data, contract, address]);
   return (
     <div className="App">
       <div className="big-text">https://twitter.com/BoxMrChen</div>
@@ -60,16 +84,16 @@ function Page() {
         <ConnectButton />
       </div>
       <br />
-      {address ? (
+      {allReady ? (
         <div>
           <div className="bd">
             数量 -- (amount):
-            <input />
+            <input value={amount} onChange={handleSetAmount} />
           </div>
           <br />
           <div className="bd">
             锁定时间 -- (term):
-            <input />
+            <input value={term} onChange={handleSetTerm} />
             <br />
             如果为0，则为递增模式，比如数量是4，那么会有四个地址依次mint时间为1,2,3,4天锁定。
             <br />
