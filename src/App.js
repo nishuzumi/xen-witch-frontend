@@ -124,7 +124,11 @@ function MintedList() {
 
   return (
     <div className="card-list">
-      {data ? data.map((userInfo) => <Card userInfo={userInfo} />) : ""}
+      {data
+        ? data.map((userInfo) => (
+            <Card key={userInfo["user"]} userInfo={userInfo} />
+          ))
+        : ""}
     </div>
   );
 }
