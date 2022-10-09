@@ -16,3 +16,19 @@
   border: 1px solid gray;
   padding: 4px;
 }
+
+.card-list {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.card {
+  min-width: 180px;
+  flex-grow: 1;
+  padding: 8px;
+  border: 1px solid gray;
+  border-radius: 8px;
+}
