@@ -1,0 +1,18 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.big-text {
+  font-size: 25px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+.bd {
+  border: 1px solid gray;
+  padding: 4px;
+}
