@@ -188,6 +188,12 @@ function Page() {
       </div>
       <div className="big-text">Xen Crypto 批量工具</div>
       <div className="big-text">注意不要使用别人修改的版本，后果自负</div>
+      <div>
+        源码Github: https://github.com/nishuzumi/xen-witch-frontend
+        <br />
+        源码CodeSandBox:
+        https://codesandbox.io/s/github/nishuzumi/xen-witch-frontend
+      </div>
       <br />
       <div className="center">
         <ConnectButton />
