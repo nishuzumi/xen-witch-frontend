@@ -98,13 +98,12 @@ function MintedList() {
     watch: true,
     cacheOnBlock: true,
   });
-  const [page, setPage] = useState(0);
   const userAddresses = useMemo(() => {
     if (!userCreateCount) return [];
     const userCreateCountNum = userCreateCount.toNumber();
     if (userCreateCountNum == 0) return [];
     const addresses = [];
-    for (let i = 0; i < (page + 1) * 50; i++) {
+    for (let i = 0; i < userCreateCountNum; i++) {
       addresses.push(getContractAddress(address, i));
     }
     return addresses;
@@ -156,16 +155,18 @@ function Page() {
     setDonate(!donate);
   };
 
-  useEffect(() => {
-    if (!donate && amount > 3) {
-      setAmount(3);
-    }
-  }, [donate, amount]);
-
   const handleSetAmount = (ev) => {
+    let amount = ev.target.value;
+    setAmount(amount);
+  };
+
+  const handleBlurAmount = (ev) => {
     let amount = parseInt(ev.target.value, 10);
-    if (!amount || amount <= 0) {
+    if (!amount || amount < 1) {
       amount = 1;
+    }
+    if (!donate && amount > 3) {
+      amount = 3;
     }
     setAmount(amount);
   };
@@ -238,7 +239,12 @@ function Page() {
         <div>
           <div className="bd">
             数量 -- (amount):
-            <input value={amount} onChange={handleSetAmount} />
+            <input
+              type="number"
+              value={amount}
+              onChange={handleSetAmount}
+              onBlur={handleBlurAmount}
+            />
           </div>
           <br />
           <div className="bd">
