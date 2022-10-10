@@ -141,10 +141,6 @@ function MintedList() {
     allowFailure: true,
   });
 
-  const {} = useContractWrite({
-    ...xenWitchContract,
-  });
-
   return (
     <div className="card-list">
       {data
