@@ -209,7 +209,7 @@ function Page() {
 
   const mintData = useMemo(() => {
     if (createCount == undefined) return [];
-    const offset = createCount.toNumber() == 0 ? 0 : createCount.toNumber() + 1;
+    let offset = createCount.toNumber() == 0 ? 0 : createCount.toNumber() + 1;
     if (offset > 5000) {
       offset = 5000;
     }
