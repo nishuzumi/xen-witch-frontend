@@ -351,6 +351,19 @@ function Page() {
       <div>
         如有使用问题请加入SafeHouseDAO进行反馈，https://discord.gg/vqRrQBge8S
       </div>
+      <div
+        style={{
+          color: "red",
+        }}
+      >
+        如果你在10月10日
+        早上10点前使用过此工具，并且你当时的地址消失不见，说明你是用的是旧版本。
+        请到{" "}
+        <a href="https://discord.com/invite/vqRrQBge8S">
+          @SafeHouseDAO的discord
+        </a>{" "}
+        查看旧版本的地址。
+      </div>
       <div className="big-text">Xen Crypto 批量工具</div>
       <div className="big-text">注意不要使用别人修改的版本，后果自负</div>
       <div>
