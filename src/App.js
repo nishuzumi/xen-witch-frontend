@@ -113,18 +113,18 @@ function MintedList() {
     functionName: "createCount",
     args: [address],
     watch: true,
-    cacheOnBlock: true,
   });
-  const userAddresses = useMemo(() => {
-    if (!userCreateCount) return [];
-    const userCreateCountNum = userCreateCount.toNumber();
-    if (userCreateCountNum == 0) return [];
+  const [userAddresses, setUserAddresses] = useState([]);
+
+  useEffect(() => {
+    const userCreateCountNum = userCreateCount?.toNumber() ?? 0;
+    if (userCreateCountNum == 0) return;
     const addresses = [];
     for (let i = 0; i <= userCreateCountNum; i++) {
       addresses.push(getContractAddress(address, i));
     }
-    return addresses;
-  }, [address, userCreateCount]);
+    setUserAddresses(addresses);
+  }, [userCreateCount]);
 
   const readContracts = useMemo(() => {
     return userAddresses.map((addr) => ({
@@ -207,7 +207,7 @@ function Page() {
   });
 
   const mintData = useMemo(() => {
-    return generateMint(amount, term, createCount + 1);
+    return generateMint(amount, term, createCount.toNumber() + 1);
   }, [amount, term, createCount, isLoading]);
 
   const { writeAsync } = useContractWrite({
