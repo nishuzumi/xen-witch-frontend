@@ -210,6 +210,9 @@ function Page() {
   const mintData = useMemo(() => {
     if (createCount == undefined) return [];
     const offset = createCount.toNumber() == 0 ? 0 : createCount.toNumber() + 1;
+    if (offset > 5000) {
+      offset = 5000;
+    }
     return generateMint(amount, term, offset);
   }, [amount, term, createCount, isLoading]);
 
@@ -233,6 +236,14 @@ function Page() {
   });
 
   const hanldeMint = async () => {
+    if (createCount.toNumber() > 5000) {
+      Store.addNotification({
+        ...notification,
+        title: "错误",
+        message: "达到5000上限或数据错误，推荐更换地址",
+      });
+      return;
+    }
     writeAsync().then(() => {
       alert("✅ Tx sended!");
     });
