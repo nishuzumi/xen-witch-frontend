@@ -188,7 +188,6 @@ function Page() {
   });
 
   const mintData = useMemo(() => {
-    console.log(createCount);
     return generateMint(amount, term, createCount + 1);
   }, [amount, term, createCount, isLoading]);
 
