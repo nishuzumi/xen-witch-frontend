@@ -208,7 +208,8 @@ function Page() {
 
   const mintData = useMemo(() => {
     if (createCount == undefined) return [];
-    return generateMint(amount, term, createCount.toNumber() + 1);
+    const offset = createCount.toNumber() == 0 ? 0 : createCount.toNumber() + 1;
+    return generateMint(amount, term, offset);
   }, [amount, term, createCount, isLoading]);
 
   const { writeAsync } = useContractWrite({
