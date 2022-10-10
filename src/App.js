@@ -50,7 +50,7 @@ const xenWitchContract = {
 };
 
 function Card(props) {
-  const {address} = useAccount()
+  const { address } = useAccount();
   const { userInfo } = props;
 
   const { writeAsync } = useContractWrite({
@@ -59,7 +59,15 @@ function Card(props) {
       "function callTarget(address target,uint value,bytes calldata data) returns(bytes memory)",
     ]),
     functionName: "callTarget",
-    args: [XENAddress, 0, XENInterface.encodeFunctionData("claimMintRewardAndShare",[address,100])],
+    mode: "recklesslyUnprepared",
+    args: [
+      XENAddress,
+      0,
+      XENInterface.encodeFunctionData("claimMintRewardAndShare", [
+        address,
+        100,
+      ]),
+    ],
   });
 
   const handleClaimed = () => {
