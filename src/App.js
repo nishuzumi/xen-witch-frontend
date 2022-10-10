@@ -26,7 +26,7 @@ import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 
 Sentry.init({
-  dsn: "https://a68af16013d04b1e887f85bf768300bf@o558152.ingest.sentry.io/4503958063480833",
+  dsn: "https://f32f07092b144606a75e73caf8265606@o4503958384934912.ingest.sentry.io/4503958397845504",
   integrations: [new BrowserTracing()],
 
   // Set tracesSampleRate to 1.0 to capture 100%
@@ -34,6 +34,7 @@ Sentry.init({
   // We recommend adjusting this value in production
   tracesSampleRate: 1.0,
 });
+
 const { chains, provider } = configureChains(
   [chain.mainnet],
   [publicProvider()]
