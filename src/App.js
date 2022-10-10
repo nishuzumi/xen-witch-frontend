@@ -107,7 +107,7 @@ function MintedList() {
     const userCreateCountNum = userCreateCount.toNumber();
     if (userCreateCountNum == 0) return [];
     const addresses = [];
-    for (let i = 0; i < userCreateCountNum; i++) {
+    for (let i = 0; i <= userCreateCountNum; i++) {
       addresses.push(getContractAddress(address, i));
     }
     return addresses;
