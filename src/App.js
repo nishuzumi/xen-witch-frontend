@@ -1,10 +1,13 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import "./styles.css";
-import { contractAddress, getContractAddress } from "./helper";
+import { contractAddress, getContractAddress, notification } from "./helper";
 import "@rainbow-me/rainbowkit/styles.css";
 import { generateMint, XenWitchInterface } from "./XenWitch";
 import { XENAddress, XENInterface } from "./XEN";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { ReactNotifications, Store } from "react-notifications-component";
+import "react-notifications-component/dist/theme.css";
+import "animate.css/animate.min.css";
 import {
   chain,
   configureChains,
@@ -38,6 +41,7 @@ export default function App() {
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains}>
+        <ReactNotifications />
         <Page />
       </RainbowKitProvider>
     </WagmiConfig>
@@ -201,6 +205,14 @@ function Page() {
     args: [mintData, ref],
     overrides: {
       value: donate ? minDonate : 0,
+    },
+    onError: (err) => {
+      Store.addNotification({
+        ...notification,
+        title: "错误",
+        message: err.error.message,
+        type: "danger",
+      });
     },
   });
 
