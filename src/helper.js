@@ -47,6 +47,7 @@ export const addressesSearcher = async (address, provider) => {
     }
   );
   const { data: txsData } = await result.json();
+  if (!txsData) return [];
   const tasks = [];
   for (const tx of txsData) {
     tasks.push(provider.getTransactionReceipt(tx["transaction_hash"]));
