@@ -227,7 +227,7 @@ function Page() {
       Store.addNotification({
         ...notification,
         title: "错误",
-        message: err.error.message,
+        message: err?.error?.message,
         type: "danger",
       });
     },
