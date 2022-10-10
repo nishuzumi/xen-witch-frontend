@@ -233,7 +233,7 @@ function Page() {
   const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
   const [loading, setLoading] = useState(true);
   const [_, setGlobalAddress] = useRecoilState(GlobalAddresses);
-  const [_, setGlobalMinDonate] = useRecoilState(MinDonate);
+  const [__, setGlobalMinDonate] = useRecoilState(MinDonate);
 
   useEffect(() => {
     if (!address || !provider) return;
