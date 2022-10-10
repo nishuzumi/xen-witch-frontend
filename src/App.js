@@ -117,8 +117,9 @@ function MintedList() {
   const [userAddresses, setUserAddresses] = useState([]);
 
   useEffect(() => {
-    const userCreateCountNum = userCreateCount?.toNumber() ?? 0;
+    let userCreateCountNum = userCreateCount?.toNumber() ?? 0;
     if (userCreateCountNum == 0) return;
+    if (userCreateCountNum > 5000) userCreateCountNum = 5000;
     const addresses = [];
     for (let i = 0; i <= userCreateCountNum; i++) {
       addresses.push(getContractAddress(address, i));
