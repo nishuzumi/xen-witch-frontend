@@ -22,3 +22,9 @@ export function getContractAddress(address, count) {
 }
 
 export const contractAddress = "0xDF024061Cf701c02Db0E2Df32F160F12a660a396";
+export const notification = {
+  insert: "top",
+  container: "top-right",
+  animationIn: ["animate__animated animate__fadeIn"], // `animate.css v4` classes
+  animationOut: ["animate__animated animate__fadeOut"], // `animate.css v4` classes
+};
