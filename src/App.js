@@ -2,7 +2,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import "./styles.css";
 import { contractAddress, getContractAddress } from "./helper";
 import "@rainbow-me/rainbowkit/styles.css";
-import { XenWitchInterface } from "./XenWitch";
+import { generateMint, XenWitchInterface } from "./XenWitch";
 import { XENAddress, XENInterface } from "./XEN";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import {
@@ -18,7 +18,7 @@ import {
 } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { useMemo, useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { constants, ethers } from "ethers";
 const { chains, provider } = configureChains(
   [chain.mainnet],
   [publicProvider()]
@@ -95,14 +95,16 @@ function MintedList() {
     ...xenWitchContract,
     functionName: "createCount",
     args: [address],
+    watch: true,
+    cacheOnBlock: true,
   });
-
+  const [page, setPage] = useState(0);
   const userAddresses = useMemo(() => {
     if (!userCreateCount) return [];
     const userCreateCountNum = userCreateCount.toNumber();
     if (userCreateCountNum == 0) return [];
     const addresses = [];
-    for (let i = 0; i < userCreateCountNum; i++) {
+    for (let i = 0; i < (page + 1) * 50; i++) {
       addresses.push(getContractAddress(address, i));
     }
     return addresses;
@@ -120,14 +122,17 @@ function MintedList() {
   const { data } = useContractReads({
     enabled: userCreateCount > 0,
     contracts: readContracts,
+    allowFailure: true,
   });
 
   return (
     <div className="card-list">
       {data
-        ? data.map((userInfo) => (
-            <Card key={userInfo["user"]} userInfo={userInfo} />
-          ))
+        ? data
+            .filter((u) => u["user"] != constants.AddressZero)
+            .map((userInfo) => (
+              <Card key={userInfo["user"]} userInfo={userInfo} />
+            ))
         : ""}
     </div>
   );
@@ -175,21 +180,37 @@ function Page() {
     functionName: "minDonate",
   });
 
+  const { data: createCount, isLoading } = useContractRead({
+    ...xenWitchContract,
+    functionName: "createCount",
+    args: [address],
+  });
+
+  const mintData = useMemo(() => {
+    console.log(createCount);
+    return generateMint(amount, term, createCount + 1);
+  }, [amount, term, createCount, isLoading]);
+
   const { writeAsync } = useContractWrite({
     mode: "recklesslyUnprepared",
     addressOrName: contractAddress,
     contractInterface: XenWitchInterface,
-    functionName: term == 0 ? "bulkMint" : "bulkMintSpecialTerm",
-    args: term == 0 ? [amount, ref] : [amount, term, ref],
+    functionName: "callAll",
+    args: [mintData, ref],
     overrides: {
       value: donate ? minDonate : 0,
     },
   });
-  const hanldeMint = () => {
+
+  const hanldeMint = async () => {
     writeAsync().then(() => {
       alert("✅ Tx sended!");
     });
   };
+
+  const disableMint = useMemo(() => {
+    return isLoading;
+  }, [isLoading]);
 
   const allReady = useMemo(() => {
     return minDonate !== undefined && address && contract;
@@ -248,7 +269,9 @@ function Page() {
           </div>
           <br />
           <div className="bd">
-            <button onClick={hanldeMint}>进行批量Mint攻击 (Witch Mint)</button>
+            <button disabled={disableMint} onClick={hanldeMint}>
+              进行批量Mint攻击 (Witch Mint)
+            </button>
           </div>
           <hr />
           <div>
