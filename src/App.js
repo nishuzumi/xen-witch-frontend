@@ -172,7 +172,9 @@ function Page() {
   };
 
   const handleSetTerm = (ev) => {
-    setTerm(parseInt(ev.target.value, 10));
+    let term = parseInt(ev.target.value, 10);
+    if (isNaN(term)) term = 0;
+    setTerm(term);
   };
 
   const { data: minDonate } = useContractRead({
