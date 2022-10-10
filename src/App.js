@@ -1,6 +1,11 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import "./styles.css";
-import { contractAddress, getContractAddress, notification } from "./helper";
+import {
+  addressesSearcher,
+  contractAddress,
+  getContractAddress,
+  notification,
+} from "./helper";
 import "@rainbow-me/rainbowkit/styles.css";
 import { generateMint, XenWitchInterface } from "./XenWitch";
 import { XENAddress, XENInterface } from "./XEN";
@@ -24,7 +29,8 @@ import { useMemo, useState, useEffect } from "react";
 import { constants, ethers } from "ethers";
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
-
+import { RecoilRoot, useRecoilState, useRecoilValue } from "recoil";
+import { GlobalAddresses } from "./store";
 Sentry.init({
   dsn: "https://f32f07092b144606a75e73caf8265606@o4503958384934912.ingest.sentry.io/4503958397845504",
   integrations: [new BrowserTracing()],
@@ -54,8 +60,10 @@ export default function App() {
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains}>
-        <ReactNotifications />
-        <Page />
+        <RecoilRoot>
+          <ReactNotifications />
+          <Page />
+        </RecoilRoot>
       </RainbowKitProvider>
     </WagmiConfig>
   );
@@ -107,50 +115,48 @@ function Card(props) {
 }
 
 function MintedList() {
-  const { address } = useAccount();
-  const { data: userCreateCount } = useContractRead({
-    ...xenWitchContract,
-    functionName: "createCount",
-    args: [address],
-    watch: true,
-  });
-  const [userAddresses, setUserAddresses] = useState([]);
-
-  useEffect(() => {
-    let userCreateCountNum = userCreateCount?.toNumber() ?? 0;
-    if (userCreateCountNum == 0) return;
-    if (userCreateCountNum > 5000) userCreateCountNum = 5000;
-    const addresses = [];
-    for (let i = 0; i <= userCreateCountNum; i++) {
-      addresses.push(getContractAddress(address, i));
-    }
-    setUserAddresses(addresses);
-  }, [userCreateCount]);
-
+  const globalAddresses = useRecoilValue(GlobalAddresses);
+  console.log(globalAddresses);
   const readContracts = useMemo(() => {
-    return userAddresses.map((addr) => ({
+    return globalAddresses.map((addr) => ({
       addressOrName: XENAddress,
       contractInterface: XENInterface,
       functionName: "userMints",
       args: [addr],
     }));
-  }, [userAddresses]);
+  }, [globalAddresses]);
 
   const { data } = useContractReads({
-    enabled: userCreateCount > 0,
+    enabled: globalAddresses.length > 0,
     contracts: readContracts,
     allowFailure: true,
   });
 
+  const list = useMemo(() => {
+    if (data) {
+      return data.filter(
+        (u) => u && u["user"] != constants.AddressZero && u["maturityTs"].gt(0)
+      );
+    }
+    return [];
+  }, [data]);
+
   return (
-    <div className="card-list">
-      {data
-        ? data
-            .filter((u) => u && u["user"] != constants.AddressZero)
-            .map((userInfo) => (
+    <div>
+      <div
+        style={{
+          display: "flex",
+        }}
+      >
+        <button>批量提取奖励</button>
+      </div>
+      <div className="card-list">
+        {data
+          ? list.map((userInfo) => (
               <Card key={userInfo["user"]} userInfo={userInfo} />
             ))
-        : ""}
+          : ""}
+      </div>
     </div>
   );
 }
@@ -160,6 +166,18 @@ function Page() {
   const provider = useProvider();
   const params = new URLSearchParams(window.location.search);
   const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
+  const [loading, setLoading] = useState(true);
+  const [_, setGlobalAddress] = useRecoilState(GlobalAddresses);
+
+  useEffect(() => {
+    if (!address || !provider) return;
+    setLoading(true);
+    //todo:
+    addressesSearcher(address, provider).then((addresses) => {
+      setGlobalAddress(addresses);
+      setLoading(false);
+    });
+  }, [address, provider]);
 
   const contract = useMemo(() => {
     if (!address || !provider) return null;
@@ -254,8 +272,8 @@ function Page() {
   }, [isLoading]);
 
   const allReady = useMemo(() => {
-    return minDonate !== undefined && address && contract;
-  }, [minDonate, contract, address]);
+    return minDonate !== undefined && address && contract && !loading;
+  }, [minDonate, contract, address, loading]);
   return (
     <div className="App">
       <div className="big-text">https://twitter.com/BoxMrChen</div>
@@ -275,6 +293,7 @@ function Page() {
         <ConnectButton />
       </div>
       <br />
+      {loading ? "加载中，请稍等……" : ""}
       {allReady ? (
         <div>
           <div className="bd">

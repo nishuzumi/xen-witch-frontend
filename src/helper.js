@@ -1,5 +1,5 @@
 import { utils } from "ethers";
-import { keccak256, solidityPack } from "ethers/lib/utils";
+import { getAddress, keccak256, solidityPack } from "ethers/lib/utils";
 
 const CACreationCode = [
   "0x3d602d80600a3d3981f3363d3d373d3d3d363d73",
@@ -31,4 +31,39 @@ export const notification = {
     duration: 5000,
     onScreen: true,
   },
+};
+const KEY = "2EiFzbjrGf6ELZQi9VMtoBQ88gf";
+export const addressesSearcher = async (address, provider) => {
+  const header = new Headers();
+  header.append("X-API-KEY", KEY);
+  header.append("Content-Type", "application/json");
+
+  const result = await fetch(
+    `https://api.chainbase.online/v1/account/txs?chain_id=1&address=${address}&contract_address=${contractAddress}`,
+    {
+      method: "GET",
+      headers: header,
+      redirect: "follow",
+    }
+  );
+  const txs = await result.json();
+  console.log(provider);
+  const tasks = [];
+  for (const tx of txs["data"]) {
+    tasks.push(provider.getTransactionReceipt(tx["transaction_hash"]));
+  }
+
+  const data = await Promise.all(tasks);
+  const addresses = [];
+  for (const one of data) {
+    one.logs?.map((log) => {
+      if (
+        log.topics[0] ==
+        "0xe9149e1b5059238baed02fa659dbf4bd932fbcf760a431330df4d934bc942f37"
+      ) {
+        addresses.push("0x" + log.topics[1].slice(-40));
+      }
+    });
+  }
+  return addresses;
 };
