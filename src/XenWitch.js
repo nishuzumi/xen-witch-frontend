@@ -245,11 +245,11 @@ export const generateClaim = (ids) => {
   }
 
   const calls = [];
-  for (let i = 0; i < amount; i++) {
+  for (let i = 0; i < ids.length; i++) {
     calls.push({
       target: XENAddress,
       data: XENInterface.encodeFunctionData("claimMintReward"),
-      id: i,
+      id: ids[i],
       value: 0,
     });
   }

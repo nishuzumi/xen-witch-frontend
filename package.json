@@ -6,13 +6,17 @@
   "main": "src/index.js",
   "dependencies": {
     "@rainbow-me/rainbowkit": "0.7.1",
+    "@sentry/react": "^7.14.2",
+    "@sentry/tracing": "^7.14.2",
+    "add": "^2.0.6",
     "animate.css": "^4.1.1",
     "ethers": "5.7.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-notifications-component": "^4.0.1",
     "react-scripts": "4.0.0",
-    "wagmi": "0.6.8"
+    "wagmi": "0.6.8",
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@babel/runtime": "7.13.8",

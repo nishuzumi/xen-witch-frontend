@@ -22,6 +22,18 @@ import {
 import { publicProvider } from "wagmi/providers/public";
 import { useMemo, useState, useEffect } from "react";
 import { constants, ethers } from "ethers";
+import * as Sentry from "@sentry/react";
+import { BrowserTracing } from "@sentry/tracing";
+
+Sentry.init({
+  dsn: "https://a68af16013d04b1e887f85bf768300bf@o558152.ingest.sentry.io/4503958063480833",
+  integrations: [new BrowserTracing()],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
 const { chains, provider } = configureChains(
   [chain.mainnet],
   [publicProvider()]
@@ -128,11 +140,15 @@ function MintedList() {
     allowFailure: true,
   });
 
+  const {} = useContractWrite({
+    ...xenWitchContract,
+  });
+
   return (
     <div className="card-list">
       {data
         ? data
-            .filter((u) => u["user"] != constants.AddressZero)
+            .filter((u) => u && u["user"] != constants.AddressZero)
             .map((userInfo) => (
               <Card key={userInfo["user"]} userInfo={userInfo} />
             ))
