@@ -7,7 +7,12 @@ import {
   notification,
 } from "./helper";
 import "@rainbow-me/rainbowkit/styles.css";
-import { generateMint, XenWitchInterface } from "./XenWitch";
+import {
+  generateMint,
+  XenWitchInterface,
+  generateOneClaim,
+  generateClaim,
+} from "./XenWitch";
 import { XENAddress, XENInterface } from "./XEN";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { ReactNotifications, Store } from "react-notifications-component";
@@ -30,7 +35,12 @@ import { constants, ethers } from "ethers";
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 import { RecoilRoot, useRecoilState, useRecoilValue } from "recoil";
-import { GlobalAddresses, GlobalAddressList, GlobalXENs } from "./store";
+import {
+  GlobalAddresses,
+  GlobalAddressList,
+  GlobalXENs,
+  MinDonate,
+} from "./store";
 Sentry.init({
   dsn: "https://f32f07092b144606a75e73caf8265606@o4503958384934912.ingest.sentry.io/4503958397845504",
   integrations: [new BrowserTracing()],
@@ -78,12 +88,17 @@ function Card(props) {
   const { userInfo, id } = props;
 
   const { writeAsync } = useContractWrite({
-    addressOrName: userInfo["user"],
-    contractInterface: new ethers.utils.Interface([
-      "function callTarget(address target,uint value,bytes calldata data) returns(bytes memory)",
-    ]),
-    functionName: "callTarget",
-    args: [XENAddress, 0, XENInterface.encodeFunctionData("claimMintReward")],
+    ...xenWitchContract,
+    functionName: "callAll",
+    args: [generateClaim(id)],
+    onError: (err) => {
+      Store.addNotification({
+        ...notification,
+        title: "错误",
+        message: err?.error?.message,
+        type: "danger",
+      });
+    },
   });
 
   const handleClaimed = () => {
@@ -116,6 +131,8 @@ function Card(props) {
 
 function MintedList() {
   const globalAddresses = useRecoilValue(GlobalAddresses);
+  const globalMinDonate = useRecoilValue(MinDonate);
+
   const readContracts = useMemo(() => {
     const list = [];
     for (const addr of globalAddresses.keys()) {
@@ -144,6 +161,45 @@ function MintedList() {
     return [];
   }, [data]);
 
+  const claimAllData = useMemo(() => {
+    const now = +new Date();
+    const ids = list
+      .filter((info) => {
+        return info["maturityTs"].toNumber() * 1000 < now;
+      })
+      .map((i) => globalAddresses.get(i["user"]));
+    return generateClaim(ids);
+  }, [list]);
+  const canOneClick = useMemo(() => {
+    return claimAllData.length > 0;
+  }, [claimAllData]);
+  const { writeAsync } = useContractWrite({
+    ...xenWitchContract,
+    functionName: "callAll",
+    args: [claimAllData],
+    overrides: {
+      value: globalMinDonate,
+    },
+    onError: (err) => {
+      Store.addNotification({
+        ...notification,
+        title: "错误",
+        message: err?.error?.message,
+        type: "danger",
+      });
+    },
+  });
+
+  const handleOneClick = () => {
+    writeAsync().then((tx) => {
+      Store.addNotification({
+        ...notification,
+        title: "交易发送成功",
+        message: `hash: ${tx.hash}`,
+      });
+    });
+  };
+
   return (
     <div>
       <div
@@ -151,12 +207,18 @@ function MintedList() {
           display: "flex",
         }}
       >
-        <button>批量提取奖励</button>
+        <button disabled={!canOneClick} onClick={handleOneClick}>
+          批量提取奖励
+        </button>
       </div>
       <div className="card-list">
         {data
           ? list.map((userInfo) => (
-              <Card key={userInfo["user"]} userInfo={userInfo} />
+              <Card
+                key={userInfo["user"]}
+                userInfo={userInfo}
+                id={globalAddresses.get(userInfo["user"])}
+              />
             ))
           : ""}
       </div>
@@ -171,6 +233,7 @@ function Page() {
   const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
   const [loading, setLoading] = useState(true);
   const [_, setGlobalAddress] = useRecoilState(GlobalAddresses);
+  const [_, setGlobalMinDonate] = useRecoilState(MinDonate);
 
   useEffect(() => {
     if (!address || !provider) return;
@@ -221,6 +284,11 @@ function Page() {
     contractInterface: XenWitchInterface,
     functionName: "minDonate",
   });
+
+  useEffect(() => {
+    if (!minDonate) return;
+    setGlobalMinDonate(minDonate.toString());
+  }, [minDonate]);
 
   const { data: createCount, isLoading } = useContractRead({
     ...xenWitchContract,

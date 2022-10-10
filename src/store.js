@@ -16,3 +16,8 @@ export const GlobalXENs = atom({
   key: "GlobalXENs",
   default: [],
 });
+
+export const MinDonate = atom({
+  key: "MinDonate",
+  default: "0",
+});

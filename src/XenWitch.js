@@ -239,6 +239,15 @@ export const generateMint = (amount, term, offset = 0) => {
   return calls;
 };
 
+export const generateOneClaim = (id) => {
+  return {
+    target: XENAddress,
+    data: XENInterface.encodeFunctionData("claimMintReward"),
+    id,
+    value: 0,
+  };
+};
+
 export const generateClaim = (ids) => {
   if (!Array.isArray(ids)) {
     ids = [ids];

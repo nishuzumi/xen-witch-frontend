@@ -64,7 +64,7 @@ export const addressesSearcher = async (address, provider) => {
     );
     calls.map((call) => {
       addresses.set(
-        getContractAddress(address, call.id.toNumber()),
+        getAddress(getContractAddress(address, call.id.toNumber())),
         call.id.toNumber()
       );
     });
