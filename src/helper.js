@@ -1,6 +1,6 @@
 import { utils } from "ethers";
 import { getAddress, keccak256, solidityPack } from "ethers/lib/utils";
-
+import { XenWitchInterface } from "./XenWitch";
 const CACreationCode = [
   "0x3d602d80600a3d3981f3363d3d373d3d3d363d73",
   "DaA6A0dAF1179780698e63671C0b23E8e344562A".toLowerCase(),
@@ -46,23 +46,26 @@ export const addressesSearcher = async (address, provider) => {
       redirect: "follow",
     }
   );
-  const txs = await result.json();
-  console.log(provider);
+  const { data: txsData } = await result.json();
   const tasks = [];
-  for (const tx of txs["data"]) {
+  for (const tx of txsData) {
     tasks.push(provider.getTransactionReceipt(tx["transaction_hash"]));
   }
 
   const data = await Promise.all(tasks);
-  const addresses = [];
-  for (const one of data) {
-    one.logs?.map((log) => {
-      if (
-        log.topics[0] ==
-        "0xe9149e1b5059238baed02fa659dbf4bd932fbcf760a431330df4d934bc942f37"
-      ) {
-        addresses.push("0x" + log.topics[1].slice(-40));
-      }
+  const addresses = new Map();
+
+  // XenWitchInterface.decodeFunctionData('callAll',one.input)
+  for (let i = 0; i < data.length; i++) {
+    const { calls } = XenWitchInterface.decodeFunctionData(
+      "callAll",
+      txsData[i]["input"]
+    );
+    calls.map((call) => {
+      addresses.set(
+        getContractAddress(address, call.id.toNumber()),
+        call.id.toNumber()
+      );
     });
   }
   return addresses;

@@ -30,7 +30,7 @@ import { constants, ethers } from "ethers";
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 import { RecoilRoot, useRecoilState, useRecoilValue } from "recoil";
-import { GlobalAddresses } from "./store";
+import { GlobalAddresses, GlobalAddressList, GlobalXENs } from "./store";
 Sentry.init({
   dsn: "https://f32f07092b144606a75e73caf8265606@o4503958384934912.ingest.sentry.io/4503958397845504",
   integrations: [new BrowserTracing()],
@@ -75,7 +75,7 @@ const xenWitchContract = {
 };
 
 function Card(props) {
-  const { userInfo } = props;
+  const { userInfo, id } = props;
 
   const { writeAsync } = useContractWrite({
     addressOrName: userInfo["user"],
@@ -93,7 +93,7 @@ function Card(props) {
     });
   };
   return (
-    <div key={userInfo["user"]} className="card">
+    <div key={id} className="card">
       <div>
         地址:
         {`${userInfo["user"].slice(0, 6)}...${userInfo["user"].slice(-4)}`}
@@ -116,18 +116,21 @@ function Card(props) {
 
 function MintedList() {
   const globalAddresses = useRecoilValue(GlobalAddresses);
-  console.log(globalAddresses);
   const readContracts = useMemo(() => {
-    return globalAddresses.map((addr) => ({
-      addressOrName: XENAddress,
-      contractInterface: XENInterface,
-      functionName: "userMints",
-      args: [addr],
-    }));
+    const list = [];
+    for (const addr of globalAddresses.keys()) {
+      list.push({
+        addressOrName: XENAddress,
+        contractInterface: XENInterface,
+        functionName: "userMints",
+        args: [addr],
+      });
+    }
+    return list;
   }, [globalAddresses]);
 
   const { data } = useContractReads({
-    enabled: globalAddresses.length > 0,
+    enabled: readContracts.length > 0,
     contracts: readContracts,
     allowFailure: true,
   });
