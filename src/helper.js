@@ -58,6 +58,7 @@ export const addressesSearcher = async (address, provider) => {
 
   // XenWitchInterface.decodeFunctionData('callAll',one.input)
   for (let i = 0; i < data.length; i++) {
+    if (!txsData[i]["input"].startsWith("0x98f6264")) continue;
     const { calls } = XenWitchInterface.decodeFunctionData(
       "callAll",
       txsData[i]["input"]

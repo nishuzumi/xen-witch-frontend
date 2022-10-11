@@ -85,18 +85,21 @@ const xenWitchContract = {
 };
 
 function Card(props) {
+  const { address } = useAccount();
   const { userInfo, id } = props;
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
 
   const { writeAsync } = useContractWrite({
     ...xenWitchContract,
     functionName: "callAll",
-    args: [generateClaim(id)],
+    args: [generateClaim(id, address), ref],
     mode: "recklesslyUnprepared",
     onError: (err) => {
       Store.addNotification({
         ...notification,
         title: "错误",
-        message: err?.error?.message,
+        message: err?.error?.message ?? err?.message,
         type: "danger",
       });
     },
@@ -104,8 +107,13 @@ function Card(props) {
 
   const handleClaimed = () => {
     if (+new Date() < userInfo["maturityTs"].toNumber() * 1000) return;
-    writeAsync().then(() => {
-      alert("✅ Tx Sended！");
+    writeAsync().then((tx) => {
+      Store.addNotification({
+        ...notification,
+        title: "成功",
+        message: tx.hash,
+        type: "success",
+      });
     });
   };
   return (
@@ -131,8 +139,11 @@ function Card(props) {
 }
 
 function MintedList() {
+  const { address } = useAccount();
   const globalAddresses = useRecoilValue(GlobalAddresses);
   const globalMinDonate = useRecoilValue(MinDonate);
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
 
   const readContracts = useMemo(() => {
     const list = [];
@@ -169,7 +180,7 @@ function MintedList() {
         return info["maturityTs"].toNumber() * 1000 < now;
       })
       .map((i) => globalAddresses.get(i["user"]));
-    return generateClaim(ids);
+    return generateClaim(ids, address);
   }, [list]);
   const canOneClick = useMemo(() => {
     return claimAllData.length > 0;
@@ -177,7 +188,7 @@ function MintedList() {
   const { writeAsync } = useContractWrite({
     ...xenWitchContract,
     functionName: "callAll",
-    args: [claimAllData],
+    args: [claimAllData, ref],
     overrides: {
       value: globalMinDonate,
     },
@@ -186,7 +197,7 @@ function MintedList() {
       Store.addNotification({
         ...notification,
         title: "错误",
-        message: err?.error?.message,
+        message: err?.error?.message ?? err?.message,
         type: "danger",
       });
     },
@@ -320,7 +331,7 @@ function Page() {
       Store.addNotification({
         ...notification,
         title: "错误",
-        message: err?.error?.message,
+        message: err?.error?.message ?? err?.message,
         type: "danger",
       });
     },
