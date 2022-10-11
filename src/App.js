@@ -91,6 +91,7 @@ function Card(props) {
     ...xenWitchContract,
     functionName: "callAll",
     args: [generateClaim(id)],
+    mode: "recklesslyUnprepared",
     onError: (err) => {
       Store.addNotification({
         ...notification,
@@ -180,6 +181,7 @@ function MintedList() {
     overrides: {
       value: globalMinDonate,
     },
+    mode: "recklesslyUnprepared",
     onError: (err) => {
       Store.addNotification({
         ...notification,
