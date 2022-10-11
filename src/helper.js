@@ -1,6 +1,6 @@
 import { utils } from "ethers";
 import { getAddress, keccak256, solidityPack } from "ethers/lib/utils";
-import { XenWitchInterface } from "./XenWitch";
+import { XenWitchInterface,contractAddress } from "./XenWitch";
 const CACreationCode = [
   "0x3d602d80600a3d3981f3363d3d373d3d3d363d73",
   "DaA6A0dAF1179780698e63671C0b23E8e344562A".toLowerCase(),
@@ -21,7 +21,7 @@ export function getContractAddress(address, count) {
   );
 }
 
-export const contractAddress = "0xDF024061Cf701c02Db0E2Df32F160F12a660a396";
+
 export const notification = {
   insert: "top",
   container: "top-right",
@@ -64,7 +64,6 @@ export const addressesSearcher = async (address, provider) => {
   const addresses = new Map();
 
   // XenWitchInterface.decodeFunctionData('callAll',one.input)
-  console.log(data);
   for (let i = 0; i < data.length; i++) {
     if (!txsList[i]["input"].startsWith("0x98f6264")) continue;
     const { calls } = XenWitchInterface.decodeFunctionData(
