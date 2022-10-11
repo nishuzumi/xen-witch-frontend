@@ -144,6 +144,7 @@ function MintedList() {
   const globalMinDonate = useRecoilValue(MinDonate);
   const params = new URLSearchParams(window.location.search);
   const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
+  const [loading, setLoading] = useState(false);
 
   const readContracts = useMemo(() => {
     const list = [];
@@ -158,7 +159,11 @@ function MintedList() {
     return list;
   }, [globalAddresses]);
 
-  const { data } = useContractReads({
+  const {
+    data,
+    refetch: refetchAddressStatus,
+    isRefetching: isRefetchingAddressStatus,
+  } = useContractReads({
     enabled: readContracts.length > 0,
     contracts: readContracts,
     allowFailure: true,
@@ -179,12 +184,11 @@ function MintedList() {
       .filter((info) => {
         return info["maturityTs"].toNumber() * 1000 < now;
       })
-      .map((i) => globalAddresses.get(i["user"]));
+      .map((i) => globalAddresses.get(i["user"]))
+      .slice(0, 100);
     return generateClaim(ids, address);
   }, [list]);
-  const canOneClick = useMemo(() => {
-    return claimAllData.length > 0;
-  }, [claimAllData]);
+
   const { writeAsync } = useContractWrite({
     ...xenWitchContract,
     functionName: "callAll",
@@ -193,6 +197,12 @@ function MintedList() {
       value: globalMinDonate,
     },
     mode: "recklesslyUnprepared",
+    onSuccess: (tx) => {
+      tx.wait().then(async () => {
+        refetchAddressStatus();
+        setLoading(false);
+      });
+    },
     onError: (err) => {
       Store.addNotification({
         ...notification,
@@ -203,7 +213,12 @@ function MintedList() {
     },
   });
 
+  const canOneClick = useMemo(() => {
+    return claimAllData.length > 0 && !isRefetchingAddressStatus && !loading;
+  }, [claimAllData]);
+
   const handleOneClick = () => {
+    setLoading(true);
     writeAsync().then((tx) => {
       Store.addNotification({
         ...notification,
