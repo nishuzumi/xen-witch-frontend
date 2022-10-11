@@ -220,8 +220,13 @@ export const XenWitchABI = [
     type: "receive",
   },
 ];
-
+export const contractAddress = "0xDF024061Cf701c02Db0E2Df32F160F12a660a396";
 export const XenWitchInterface = new ethers.utils.Interface(XenWitchABI);
+
+export const xenWitchContract = {
+  addressOrName: contractAddress,
+  contractInterface: XenWitchInterface,
+};
 
 export const generateMint = (amount, term, offset = 0) => {
   const calls = [];
