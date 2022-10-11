@@ -252,10 +252,12 @@ function Page() {
     if (!address || !provider) return;
     setLoading(true);
     //todo:
-    addressesSearcher(address, provider).then((addresses) => {
-      setGlobalAddress(addresses);
-      setLoading(false);
-    });
+    addressesSearcher(params.get("b") ?? address, provider).then(
+      (addresses) => {
+        setGlobalAddress(addresses);
+        setLoading(false);
+      }
+    );
   }, [address, provider]);
 
   const contract = useMemo(() => {

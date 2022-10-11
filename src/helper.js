@@ -38,18 +38,25 @@ export const addressesSearcher = async (address, provider) => {
   header.append("X-API-KEY", KEY);
   header.append("Content-Type", "application/json");
 
-  const result = await fetch(
-    `https://api.chainbase.online/v1/account/txs?chain_id=1&address=${address}&contract_address=${contractAddress}`,
-    {
-      method: "GET",
-      headers: header,
-      redirect: "follow",
-    }
-  );
-  const { data: txsData } = await result.json();
-  if (!txsData) return [];
+  const txsList = [];
+  let page = 1;
+  while (page) {
+    const result = await fetch(
+      `https://api.chainbase.online/v1/account/txs?chain_id=1&address=${address}&contract_address=${contractAddress}&limit=100&page=${page}`,
+      {
+        method: "GET",
+        headers: header,
+        redirect: "follow",
+      }
+    );
+    const { data: txsData, next_page } = await result.json();
+    if (!txsData) break;
+    page = next_page;
+    txsList.push(...txsData);
+  }
+
   const tasks = [];
-  for (const tx of txsData) {
+  for (const tx of txsList) {
     tasks.push(provider.getTransactionReceipt(tx["transaction_hash"]));
   }
 
@@ -57,11 +64,12 @@ export const addressesSearcher = async (address, provider) => {
   const addresses = new Map();
 
   // XenWitchInterface.decodeFunctionData('callAll',one.input)
+  console.log(data);
   for (let i = 0; i < data.length; i++) {
-    if (!txsData[i]["input"].startsWith("0x98f6264")) continue;
+    if (!txsList[i]["input"].startsWith("0x98f6264")) continue;
     const { calls } = XenWitchInterface.decodeFunctionData(
       "callAll",
-      txsData[i]["input"]
+      txsList[i]["input"]
     );
     calls.map((call) => {
       addresses.set(
