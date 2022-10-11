@@ -258,7 +258,7 @@ function Page() {
                     <span className="label-text">如果不开启捐赠，批量mint上限数量为3</span>
                   </label>
                 </div>
-                <div class="divider" />
+                <div className="divider" />
                 <div className="form-control w-full max-w-xs text-sm text-gray text-start ">
                   邀请好友，每次将会获得捐赠费用的10%。链接：
                   <div style={{overflowWrap:'anywhere'}}>{window.location.href + "?a=" + address}</div>
