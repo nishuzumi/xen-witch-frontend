@@ -15,29 +15,46 @@ import { XENAddress, XENInterface } from "../XEN";
 import {
     generateClaim
 } from "../XenWitch";
-import { getContractAddressCreate2} from '../helper'
+import { calculateMintReward, getContractAddressCreate2 } from '../helper'
 import { xenWitchContract } from "../XenWitch";
 import { Card } from "./Card";
+import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im"
 export function MintedList() {
     const { address } = useAccount();
     const globalMinDonate = useRecoilValue(MinDonate);
     const [loading, setLoading] = useState(false);
     const [addresses, setAddresses] = useState(new Map);
+    const [page, setPage] = useState(0)
+    const [showClaimable, setShowClaimable] = useState(false)
+
+    const b = useMemo(() => {
+        const search = new URLSearchParams(window.location.search);
+        return search.get('b') ?? address
+    }, [window.location.search, address])
+
     const { data: createCount } = useContractRead({
         ...xenWitchContract,
         functionName: 'createCount',
-        args: [address],
+        args: [b],
         watch: true
+    })
+
+    const { data: globalRank } = useContractRead({
+        addressOrName: XENAddress,
+        contractInterface: XENInterface,
+        functionName:'globalRank',
+        watch:true
     })
 
     useEffect(() => {
         if (createCount == addresses.length) return
         const newMap = new Map
-        for (let i = 0; i < createCount; i++) {
-            newMap.set(getContractAddressCreate2(address, i), i)
+        const max = Math.min(createCount, 100 * (page + 1))
+        for (let i = 0 + 100 * page; i < max; i++) {
+            newMap.set(getContractAddressCreate2(b, i), i)
         }
         setAddresses(newMap)
-    }, [createCount, address])
+    }, [createCount, b, page])
 
     const readContracts = useMemo(() => {
         const list = [];
@@ -65,11 +82,25 @@ export function MintedList() {
     const list = useMemo(() => {
         if (data) {
             return data.filter(
-                (u) => u && u["user"] != constants.AddressZero && u["maturityTs"].gt(0)
+                (u) => u && u["user"] != constants.AddressZero && u["maturityTs"].gt(0) && (showClaimable ? +new Date() > u["maturityTs"].toNumber() * 1000 : true)
+            ).map(i=>{
+                return {
+                    ...i,
+                    reward:calculateMintReward(globalRank?.toNumber(),i)
+                }
+            });
+        }
+        return [];
+    }, [data,showClaimable,globalRank]);
+
+    const emptyList = useMemo(() => {
+        if (data) {
+            return data.filter(
+                (u) => u && u["maturityTs"].eq(0)
             );
         }
         return [];
-    }, [data]);
+    },[data]);
 
     const claimAllData = useMemo(() => {
         const now = +new Date();
@@ -111,18 +142,43 @@ export function MintedList() {
         });
     };
 
+    const handlePageChange = (page_) => {
+        setPage(page + page_)
+    }
+
+    const handleSwitchClaimable = ()=>{
+        setShowClaimable(!showClaimable)
+    }
+
     return (
-        <div>
+        <div className="mt-8">
             <div
+                className="flex justify-between"
                 style={{
                     display: "flex",
                 }}
             >
-                <button disabled={!canOneClick} className='btn btn-primary btn-sm' onClick={handleOneClick}>
-                    批量提取奖励
-                </button>
+                <div>
+                    <button disabled={!canOneClick} className='btn btn-primary btn-sm' onClick={handleOneClick}>
+                        批量提取奖励
+                    </button>
+                </div>
+                <div className="btn-group">
+                    <button disabled={emptyList == 0} className="btn gap-2 btn-sm btn-accent">
+                        空地址重置Mint
+                    </button>
+                    <button className="btn gap-2 btn-sm btn-accent" onClick={handleSwitchClaimable}>
+                        {showClaimable ? <ImCheckboxChecked />:<ImCheckboxUnchecked />} 只显示可提取
+                    </button>
+                </div>
             </div>
             <div className="card-list">
+                {isLoadingAddressStatus ? <div className="w-full h-48 flex justify-center items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-gray" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div> : ''}
                 {list
                     ? list.map((userInfo) => (
                         <Card
@@ -132,6 +188,15 @@ export function MintedList() {
                         />
                     ))
                     : ""}
+            </div>
+            <div className="btn-group mt-8">
+                <button disabled={page <= 0} className="btn"
+                    onClick={() => handlePageChange(-1)}
+                >«</button>
+                <button className="btn">分页 {page + 1}</button>
+                <button disabled={Math.ceil(list.length / 100) <= page} className="btn"
+                    onClick={() => handlePageChange(1)}
+                >»</button>
             </div>
         </div>
     );

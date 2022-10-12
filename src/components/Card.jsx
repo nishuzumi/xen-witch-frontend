@@ -1,3 +1,4 @@
+import { formatEther } from 'ethers/lib/utils';
 import React from 'react';
 import toast from 'react-hot-toast';
 import {
@@ -31,16 +32,15 @@ export function Card(props) {
         });
     };
     return (
-        <div key={id} className="card-2 bg-gray-100 p-4 flex-1 rounded-md">
-            <div>
-                地址:
+        <div key={id} className="card-2 bg-gray-100 p-4 rounded-md" style={{flexBasis: '180px',flexGrow:1,flexShrink:0}}>
+            <div className='badge'>
                 {`${userInfo["user"].slice(0, 6)}...${userInfo["user"].slice(-4)}`}
-            </div>
-            <div>
-                下次Claim时间
             </div>
             <div >
                 {new Date(userInfo["maturityTs"].toNumber() * 1000).toLocaleString()}
+            </div>
+            <div >
+                预估奖励:{`${userInfo['reward'].toLocaleString("en-US",{maximumFractionDigits:0})} ETH`}
             </div>
             <div>
                 <button
