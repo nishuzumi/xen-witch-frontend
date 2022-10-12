@@ -27,9 +27,9 @@ import {
 import "./styles.css";
 import {
   generateMint,
-  XenWitchInterface,contractAddress
+  XenWitchInterface, contractAddress
 } from "./XenWitch";
-import {xenWitchContract} from "./XenWitch";
+import { xenWitchContract } from "./XenWitch";
 Sentry.init({
   dsn: "https://f32f07092b144606a75e73caf8265606@o4503958384934912.ingest.sentry.io/4503958397845504",
   integrations: [new BrowserTracing()],
@@ -58,9 +58,9 @@ const wagmiClient = createClient({
 export default function App() {
   return (
     <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider  chains={chains}>
+      <RainbowKitProvider chains={chains}>
         <RecoilRoot>
-          <Toaster position="top-right" toastOptions={{duration:5000}}/>
+          <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
           <Page />
         </RecoilRoot>
       </RainbowKitProvider>
@@ -188,6 +188,10 @@ function Page() {
         <div><ConnectButton /></div>
       </div>
       <div className="container mx-auto">
+        <div className="card bg-base-100 shadow-xl p-4 flex-1 mb-8" style={{ display: 'block' }}>
+          此版本为 <div className="badge badge-info" >ETH</div>，
+          <div className="badge badge-ghost" style={{ backgroundColor: 'orange' }}>BSC</div> 请使用<a href="https://xen-bsc.web3box.dev" className="link"> https://xen-bsc.web3box.dev</a> 版本
+        </div>
         <div className="card bg-base-100 shadow-xl p-4 flex-1">
           <div className="big-text">
             <a className='link' href="https://twitter.com/BoxMrChen" target='__blank'>https://twitter.com/BoxMrChen</a>
@@ -261,7 +265,7 @@ function Page() {
                 <div className="divider" />
                 <div className="form-control w-full max-w-xs text-sm text-gray text-start ">
                   邀请好友，每次将会获得捐赠费用的10%。链接：
-                  <div style={{overflowWrap:'anywhere'}}>{window.location.href + "?a=" + address}</div>
+                  <div style={{ overflowWrap: 'anywhere' }}>{window.location.href + "?a=" + address}</div>
                 </div>
                 <br />
                 <div className="form-control w-full max-w-xs">
