@@ -40,7 +40,7 @@ export function Card(props) {
                 {new Date(userInfo["maturityTs"].toNumber() * 1000).toLocaleString()}
             </div>
             <div >
-                预估奖励:{`${userInfo['reward'].toLocaleString("en-US",{maximumFractionDigits:0})} ETH`}
+                预计 <span className='badge'>{`${userInfo['reward'].toLocaleString("en-US",{maximumFractionDigits:0})}`}</span> ETH
             </div>
             <div>
                 <button
