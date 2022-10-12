@@ -1,35 +1,47 @@
 import { constants } from "ethers";
-import React, { useMemo, useState } from 'react';
+import { getContractAddress } from "ethers/lib/utils";
+import React, { useEffect, useMemo, useState } from 'react';
 import toast from "react-hot-toast";
 import { useRecoilValue } from "recoil";
 import {
-    useAccount, useContractReads,
+    useAccount, useContractRead, useContractReads,
     useContractWrite
 } from "wagmi";
 import {
-    notification
-} from "../helper";
-import {
-    GlobalAddresses, MinDonate
+    MinDonate
 } from "../store";
 import "../styles.css";
 import { XENAddress, XENInterface } from "../XEN";
 import {
     generateClaim
 } from "../XenWitch";
+import { getContractAddressCreate2} from '../helper'
 import { xenWitchContract } from "../XenWitch";
 import { Card } from "./Card";
 export function MintedList() {
     const { address } = useAccount();
-    const globalAddresses = useRecoilValue(GlobalAddresses);
     const globalMinDonate = useRecoilValue(MinDonate);
-    const params = new URLSearchParams(window.location.search);
-    const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
     const [loading, setLoading] = useState(false);
+    const [addresses, setAddresses] = useState(new Map);
+    const { data: createCount } = useContractRead({
+        ...xenWitchContract,
+        functionName: 'createCount',
+        args: [address],
+        watch: true
+    })
+
+    useEffect(() => {
+        if (createCount == addresses.length) return
+        const newMap = new Map
+        for (let i = 0; i < createCount; i++) {
+            newMap.set(getContractAddressCreate2(address, i), i)
+        }
+        setAddresses(newMap)
+    }, [createCount, address])
 
     const readContracts = useMemo(() => {
         const list = [];
-        for (const addr of globalAddresses.keys()) {
+        for (const addr of addresses.keys()) {
             list.push({
                 addressOrName: XENAddress,
                 contractInterface: XENInterface,
@@ -38,7 +50,7 @@ export function MintedList() {
             });
         }
         return list;
-    }, [globalAddresses]);
+    }, [addresses]);
 
     const {
         data,
@@ -61,19 +73,18 @@ export function MintedList() {
 
     const claimAllData = useMemo(() => {
         const now = +new Date();
-        const ids = list
+        return list
             .filter((info) => {
                 return info["maturityTs"].toNumber() * 1000 < now;
             })
-            .map((i) => globalAddresses.get(i["user"]))
-            .slice(0, 100);
-        return generateClaim(ids, address);
+            .map((i) => addresses.get(i["user"]))
+            .slice(0, 100);;
     }, [list]);
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
-        functionName: "callAll",
-        args: [claimAllData, ref],
+        functionName: "claim",
+        args: [claimAllData],
         overrides: {
             value: globalMinDonate,
         },
@@ -112,12 +123,12 @@ export function MintedList() {
                 </button>
             </div>
             <div className="card-list">
-                {data
+                {list
                     ? list.map((userInfo) => (
                         <Card
                             key={userInfo["user"]}
                             userInfo={userInfo}
-                            id={globalAddresses.get(userInfo["user"])}
+                            id={addresses.get(userInfo["user"])}
                         />
                     ))
                     : ""}

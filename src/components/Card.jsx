@@ -3,7 +3,6 @@ import toast from 'react-hot-toast';
 import {
     useAccount, useContractWrite
 } from "wagmi";
-import { notification } from "../helper";
 import "../styles.css";
 import {
     generateClaim, xenWitchContract

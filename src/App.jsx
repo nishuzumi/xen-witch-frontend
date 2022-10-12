@@ -18,10 +18,6 @@ import {
 import { publicProvider } from "wagmi/providers/public";
 import { MintedList } from "./components/MintedList";
 import {
-  addressesSearcher,
-  notification
-} from "./helper";
-import {
   GlobalAddresses, MinDonate
 } from "./store";
 import "./styles.css";
@@ -31,7 +27,7 @@ import {
 } from "./XenWitch";
 import {xenWitchContract} from "./XenWitch";
 Sentry.init({
-  dsn: "https://f32f07092b144606a75e73caf8265606@o4503958384934912.ingest.sentry.io/4503958397845504",
+  dsn: "https://d38b7dabe1124072b80f43425919d13c@o4503958384934912.ingest.sentry.io/4503969987100672",
   integrations: [new BrowserTracing()],
 
   // Set tracesSampleRate to 1.0 to capture 100%
@@ -41,7 +37,23 @@ Sentry.init({
 });
 
 const { chains, provider } = configureChains(
-  [chain.mainnet],
+  [{
+    id:56,
+    name:'BSC',
+    rpcUrls:{
+      default:'https://bsc-dataseed.binance.org/'
+    },
+    nativeCurrency:{
+      name:'BNB',
+      symbol:'BNB',
+      decimals:18
+    },
+    blockExplorerUrls:['https://bscscan.com/'],
+    multicall:{
+      address:'0xcA11bde05977b3631167028862bE2a173976CA11',
+      blockCreated:15921452
+    }
+  }],
   [publicProvider()]
 );
 
@@ -72,23 +84,8 @@ export default function App() {
 function Page() {
   const { address } = useAccount();
   const provider = useProvider();
-  const params = new URLSearchParams(window.location.search);
-  const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
-  const [loading, setLoading] = useState(true);
-  const [_, setGlobalAddress] = useRecoilState(GlobalAddresses);
   const [__, setGlobalMinDonate] = useRecoilState(MinDonate);
 
-  useEffect(() => {
-    if (!address || !provider) return;
-    setLoading(true);
-    //todo:
-    addressesSearcher(params.get("b") ?? address, provider).then(
-      (addresses) => {
-        setGlobalAddress(addresses);
-        setLoading(false);
-      }
-    );
-  }, [address, provider]);
 
   const contract = useMemo(() => {
     if (!address || !provider) return null;
@@ -97,10 +94,6 @@ function Page() {
 
   const [amount, setAmount] = useState(10);
   const [term, setTerm] = useState(0);
-  const [donate, setDonate] = useState(true);
-  const handleSetDonate = () => {
-    setDonate(!donate);
-  };
 
   const handleSetAmount = (ev) => {
     let amount = ev.target.value;
@@ -135,52 +128,26 @@ function Page() {
     setGlobalMinDonate(minDonate.toString());
   }, [minDonate]);
 
-  const { data: createCount, isLoading } = useContractRead({
-    ...xenWitchContract,
-    functionName: "createCount",
-    args: [address],
-  });
-
-  const mintData = useMemo(() => {
-    if (createCount == undefined) return [];
-    let offset = createCount.toNumber() == 0 ? 0 : createCount.toNumber() + 1;
-    if (offset > 5000) {
-      offset = 5000;
-    }
-    return generateMint(amount, term, offset);
-  }, [amount, term, createCount, isLoading]);
-
   const { writeAsync } = useContractWrite({
     mode: "recklesslyUnprepared",
     addressOrName: contractAddress,
     contractInterface: XenWitchInterface,
-    functionName: "callAll",
-    args: [mintData, ref],
-    overrides: {
-      value: donate ? minDonate : 0,
-    },
+    functionName: "mint",
+    args: [amount, term],
     onError: (err) => {
       toast.error(err?.error?.message ?? err?.message)
     },
   });
 
   const hanldeMint = async () => {
-    if (createCount.toNumber() > 5000) {
-      toast.error("达到5000上限或数据错误，推荐更换地址");
-      return;
-    }
     writeAsync().then(() => {
       toast.success("已提交");
     });
   };
 
-  const disableMint = useMemo(() => {
-    return isLoading;
-  }, [isLoading]);
-
   const allReady = useMemo(() => {
-    return minDonate !== undefined && address && contract && !loading;
-  }, [minDonate, contract, address, loading]);
+    return minDonate !== undefined && address && contract;
+  }, [minDonate, contract, address]);
   return (
     <div className="App bg-base-300 pb-12">
       <div className="navbar bg-base-100 mb-4 justify-between">
@@ -218,7 +185,6 @@ function Page() {
           </div>
         </div>
         <div className="mt-8">
-          {loading ? <div className="card p-8">加载中，请稍等……</div> : ""}
           {allReady ? (
             <div className="flex flex-wrap gap-8 items-start sm:justify-between justify-center">
               <div style={{ maxWidth: '360px' }} className='card shadow-xl p-4'>
@@ -247,25 +213,9 @@ function Page() {
                     <span className="label-text">如果为0，则为递增模式，比如数量是4，那么会有四个地址依次mint时间为1,2,3,4天锁定。</span>
                   </label>
                 </div>
-                <br />
-                <div className="form-control w-full max-w-xs">
-                  <label className="label cursor-pointer">
-                    <span className="label-text">开启捐赠</span>
-                    <input type="checkbox" className="checkbox checkbox-primary" checked={donate}
-                      onChange={handleSetDonate} />
-                  </label>
-                  <label className="label">
-                    <span className="label-text">如果不开启捐赠，批量mint上限数量为3</span>
-                  </label>
-                </div>
                 <div className="divider" />
-                <div className="form-control w-full max-w-xs text-sm text-gray text-start ">
-                  邀请好友，每次将会获得捐赠费用的10%。链接：
-                  <div style={{overflowWrap:'anywhere'}}>{window.location.href + "?a=" + address}</div>
-                </div>
-                <br />
                 <div className="form-control w-full max-w-xs">
-                  <button disabled={disableMint} onClick={hanldeMint} className='btn btn-primary'>
+                  <button onClick={hanldeMint} className='btn btn-primary'>
                     进行批量Mint攻击 (Witch Mint)
                   </button>
                 </div>

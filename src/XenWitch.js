@@ -65,19 +65,19 @@ export const XenWitchABI = [
       {
         components: [
           {
-            internalType: "uint256",
+            internalType: "uint32",
             name: "id",
-            type: "uint256",
+            type: "uint32",
+          },
+          {
+            internalType: "address",
+            name: "to",
+            type: "address",
           },
           {
             internalType: "uint256",
             name: "value",
             type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "target",
-            type: "address",
           },
           {
             internalType: "bytes",
@@ -89,13 +89,21 @@ export const XenWitchABI = [
         name: "calls",
         type: "tuple[]",
       },
-      {
-        internalType: "address",
-        name: "ref",
-        type: "address",
-      },
     ],
     name: "callAll",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint32[]",
+        name: "ids",
+        type: "uint32[]",
+      },
+    ],
+    name: "claim",
     outputs: [],
     stateMutability: "payable",
     type: "function",
@@ -124,33 +132,9 @@ export const XenWitchABI = [
     name: "createCount",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "uint32",
         name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "addr",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
-    ],
-    name: "getAddress",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
+        type: "uint32",
       },
     ],
     stateMutability: "view",
@@ -167,6 +151,24 @@ export const XenWitchABI = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint32",
+        name: "times",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "term_",
+        type: "uint32",
+      },
+    ],
+    name: "mint",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -210,6 +212,19 @@ export const XenWitchABI = [
   },
   {
     inputs: [],
+    name: "term",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "withdraw",
     outputs: [],
     stateMutability: "nonpayable",
@@ -219,8 +234,8 @@ export const XenWitchABI = [
     stateMutability: "payable",
     type: "receive",
   },
-];
-export const contractAddress = "0xDF024061Cf701c02Db0E2Df32F160F12a660a396";
+]
+export const contractAddress = "0xeED210f13C6aeBF3aF2f80377C73A9e60f14BeEc";
 export const XenWitchInterface = new ethers.utils.Interface(XenWitchABI);
 
 export const xenWitchContract = {
