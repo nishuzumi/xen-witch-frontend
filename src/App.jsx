@@ -155,6 +155,10 @@ function Page() {
         <div><ConnectButton /></div>
       </div>
       <div className="container mx-auto">
+      <div className="card bg-base-100 shadow-xl p-4 flex-1 mb-8" style={{display:'block'}}>
+        此版本为 <div className="badge badge-ghost" style={{backgroundColor:'orange'}}>BSC</div> 版本，
+        <div className="badge badge-info" >ETH</div> 请使用<a href="https://xen.web3box.dev" className="link"> https://xen.web3box.dev</a>
+      </div>
         <div className="card bg-base-100 shadow-xl p-4 flex-1">
           <div className="big-text">
             <a className='link' href="https://twitter.com/BoxMrChen" target='__blank'>https://twitter.com/BoxMrChen</a>
