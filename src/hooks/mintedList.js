@@ -4,7 +4,8 @@ import { getContractAddressCreate2 } from "../helper";
 import { XENInterface } from "../XEN";
 import { useXenWitchContract } from "./useXenWitchContract";
 import {useXenContractAddress} from "./useXenContract";
-
+import { useRecoilValue } from "recoil";
+import { MinDonate } from "../store";
 export function useMintedList(b){
     const [addresses, setAddresses] = useState(new Map);
     const xenWitchContract = useXenWitchContract()
@@ -47,6 +48,14 @@ export function useMintedList(b){
         enabled: readContracts.length > 0,
         contracts: readContracts,
         allowFailure: true,
+        select:(data)=>{
+            return data.map((item,index)=>{
+                return {
+                    ...item,
+                    id:index
+                }
+            })
+        }
     });
 
     return {addresses,data,refetchAddressStatus,isLoadingAddressStatus}

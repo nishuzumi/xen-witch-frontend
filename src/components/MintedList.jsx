@@ -17,6 +17,7 @@ import {
 import "../styles.css";
 import { XENInterface } from "../XEN";
 import { Card } from "./Card";
+import { RemintPanel } from './RemintPanel';
 
 export function MintedList() {
     const { address } = useAccount()
@@ -77,8 +78,8 @@ export function MintedList() {
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
+        enabled:false,
         functionName: functionClaim,
-        args: [claimAllData],
         overrides: {
             value: globalMinDonate,
         },
@@ -100,7 +101,9 @@ export function MintedList() {
 
     const handleOneClick = () => {
         setLoading(true);
-        writeAsync().then((tx) => {
+        writeAsync({
+            recklesslySetUnpreparedArgs:[claimAllData]
+        }).then((tx) => {
             toast.success("交易发送成功\n" + `hash: ${tx.hash}`)
         });
     };
@@ -111,31 +114,7 @@ export function MintedList() {
 
     return (
         <div className="mt-8">
-            <input type="checkbox" id="remint-model" className="modal-toggle" />
-            <label htmlFor="remint-model" className="modal cursor-pointer">
-                <label className="modal-box relative" for="">
-                    <h3 className="text-lg font-bold">已有地址重Mint</h3>
-                    <p className="py-4">
-                        你当前有{emptyList.length}个地址未Mint，点击下方按钮进行Mint。
-                        <div className="form-control w-full max-w-xs">
-                            <label className="label">
-                                <span className="label-text">锁定时间</span>
-                                <span className="label-text-alt">天数</span>
-                            </label>
-                            <input type="number" min={0} className="input input-bordered w-full max-w-xs input-sm" />
-                            <label className="label">
-                                <span className="label-text">如果为0，则为递增模式，比如数量是4，那么会有四个地址依次mint时间为1,2,3,4天锁定。</span>
-                            </label>
-                        </div>
-                        <div className="divider" />
-                        <div className="form-control w-full max-w-xs">
-                            <button  className='btn btn-primary'>
-                                进行批量Mint攻击 (Witch Mint)
-                            </button>
-                        </div>
-                    </p>
-                </label>
-            </label>
+            <RemintPanel emptyList={emptyList} />
             <div
                 className="flex justify-between"
                 style={{
@@ -148,10 +127,10 @@ export function MintedList() {
                     </button>
                 </div>
                 <div className="btn-group ">
-                    <label htmlFor="remint-model" className="btn gap-2 btn-sm btn-accent text-gray-50">
-                        空地址重置Mint
+                    <label htmlFor="remint-model" disabled={emptyList.length == 0} className="btn gap-2 btn-sm">
+                        {emptyList.length}个地址重置Mint
                     </label>
-                    <button className="btn gap-2 btn-sm btn-accent text-gray-50" onClick={handleSwitchClaimable}>
+                    <button className="btn gap-2 btn-sm" onClick={handleSwitchClaimable}>
                         {showClaimable ? <ImCheckboxChecked /> : <ImCheckboxUnchecked />} 只显示可提取
                     </button>
                 </div>
