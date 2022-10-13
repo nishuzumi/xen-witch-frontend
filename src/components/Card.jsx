@@ -31,7 +31,7 @@ export function Card(props) {
         });
     };
     return (
-        <div key={id} className="card-2 bg-gray-100 p-4 rounded-md" style={{flexBasis: '180px',flexGrow:1,flexShrink:0}}>
+        <div key={id} className="address-card card-2 bg-gray-100 p-4 rounded-md">
             <div className='badge'>
                 {`${userInfo["user"].slice(0, 6)}...${userInfo["user"].slice(-4)}`}
             </div>

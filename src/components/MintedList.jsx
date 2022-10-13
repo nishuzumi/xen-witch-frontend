@@ -16,16 +16,16 @@ import { Card } from "./Card";
 import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im"
 import { useXenWitchContract, useXenWitchOp } from "../hooks/useXenWitchContract";
 import { useXenContractAddress } from "../hooks/useXenContract";
+
 export function MintedList() {
     const { address } = useAccount();
     const globalMinDonate = useRecoilValue(MinDonate);
     const [loading, setLoading] = useState(false);
     const [addresses, setAddresses] = useState(new Map);
-    const [page, setPage] = useState(0)
     const [showClaimable, setShowClaimable] = useState(false)
     const xenWitchContract = useXenWitchContract()
     const XENAddress = useXenContractAddress()
-    const [_,functionClaim] = useXenWitchOp()
+    const [_, functionClaim] = useXenWitchOp()
 
     const b = useMemo(() => {
         const search = new URLSearchParams(window.location.search);
@@ -42,19 +42,17 @@ export function MintedList() {
     const { data: globalRank } = useContractRead({
         addressOrName: XENAddress,
         contractInterface: XENInterface,
-        functionName:'globalRank',
-        watch:true
+        functionName: 'globalRank',
+        watch: true
     })
-
     useEffect(() => {
         if (createCount == addresses.length) return
         const newMap = new Map
-        const max = Math.min(createCount, 100 * (page + 1))
-        for (let i = 0 + 100 * page; i < max; i++) {
-            newMap.set(getContractAddressCreate2(xenWitchContract.addressOrName,b, i), i)
+        for (let i = 0; i < createCount; i++) {
+            newMap.set(getContractAddressCreate2(xenWitchContract.addressOrName, b, i), i)
         }
         setAddresses(newMap)
-    }, [createCount, b, page])
+    }, [createCount, b])
 
     const readContracts = useMemo(() => {
         const list = [];
@@ -83,15 +81,15 @@ export function MintedList() {
         if (data) {
             return data.filter(
                 (u) => u && u["user"] != constants.AddressZero && u["maturityTs"].gt(0) && (showClaimable ? +new Date() > u["maturityTs"].toNumber() * 1000 : true)
-            ).map(i=>{
+            ).map(i => {
                 return {
                     ...i,
-                    reward:calculateMintReward(globalRank?.toNumber(),i)
+                    reward: calculateMintReward(globalRank?.toNumber(), i)
                 }
             });
         }
         return [];
-    }, [data,showClaimable,globalRank]);
+    }, [data, showClaimable, globalRank]);
 
     const emptyList = useMemo(() => {
         if (data) {
@@ -100,7 +98,7 @@ export function MintedList() {
             );
         }
         return [];
-    },[data]);
+    }, [data]);
 
     const claimAllData = useMemo(() => {
         const now = +new Date();
@@ -142,11 +140,7 @@ export function MintedList() {
         });
     };
 
-    const handlePageChange = (page_) => {
-        setPage(page + page_)
-    }
-
-    const handleSwitchClaimable = ()=>{
+    const handleSwitchClaimable = () => {
         setShowClaimable(!showClaimable)
     }
 
@@ -168,11 +162,11 @@ export function MintedList() {
                         空地址重置Mint
                     </button>
                     <button className="btn gap-2 btn-sm btn-accent" onClick={handleSwitchClaimable}>
-                        {showClaimable ? <ImCheckboxChecked />:<ImCheckboxUnchecked />} 只显示可提取
+                        {showClaimable ? <ImCheckboxChecked /> : <ImCheckboxUnchecked />} 只显示可提取
                     </button>
                 </div>
             </div>
-            <div className="card-list">
+            <div className="card-list overflow-scroll" style={{maxHeight:'800px'}}>
                 {isLoadingAddressStatus ? <div className="w-full h-48 flex justify-center items-center">
                     <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-gray" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -188,15 +182,6 @@ export function MintedList() {
                         />
                     ))
                     : ""}
-            </div>
-            <div className="btn-group mt-8">
-                <button disabled={page <= 0} className="btn"
-                    onClick={() => handlePageChange(-1)}
-                >«</button>
-                <button className="btn">分页 {page + 1}</button>
-                <button disabled={Math.ceil(list.length / 100) <= page} className="btn"
-                    onClick={() => handlePageChange(1)}
-                >»</button>
             </div>
         </div>
     );

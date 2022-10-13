@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 .App {
   font-family: sans-serif;
   text-align: center;
@@ -28,12 +29,22 @@
   justify-content: space-between;
 }
 
-body{
+body {
   min-height: 100vh;
   height: 100%;
 }
 
 
-.card{
+.card {
   @apply bg-base-100
+}
+
+.address-card {
+  content-visibility: auto;
+  flex-basis: 180px;
+  flex-grow: 1;
+  flex-shrink: 0;
+  height: 144px;
+  width: 202px;
+  contain-intrinsic-size: 202px;
 }

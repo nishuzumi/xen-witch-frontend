@@ -83,7 +83,7 @@ function Page() {
   const [functionMint] = useXenWitchOp()
 
   const contract = useMemo(() => {
-    if (!address || !provider) return null;
+    if (!address || !provider || !XenWitchInterface) return null;
     return new ethers.Contract(contractAddress, XenWitchInterface, provider);
   }, [address, provider,XenWitchInterface]);
 
