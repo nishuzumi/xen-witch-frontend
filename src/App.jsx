@@ -1,4 +1,4 @@
-import { ConnectButton, darkTheme, getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { ConnectButton, getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
@@ -17,15 +17,9 @@ import {
 } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { MintedList } from "./components/MintedList";
-import {
-  GlobalAddresses, MinDonate
-} from "./store";
+import { useXenWitchContract, useXenWitchOp } from "./hooks/useXenWitchContract";
+import { MinDonate } from "./store";
 import "./styles.css";
-import {
-  generateMint,
-  XenWitchInterface, contractAddress
-} from "./XenWitch";
-import { xenWitchContract } from "./XenWitch";
 Sentry.init({
   dsn: "https://d38b7dabe1124072b80f43425919d13c@o4503958384934912.ingest.sentry.io/4503969987100672",
   integrations: [new BrowserTracing()],
@@ -37,7 +31,7 @@ Sentry.init({
 });
 
 const { chains, provider } = configureChains(
-  [{
+  [chain.polygon,{
     id: 56,
     name: 'BSC',
     rpcUrls: {
@@ -85,7 +79,8 @@ function Page() {
   const { address } = useAccount();
   const provider = useProvider();
   const [__, setGlobalMinDonate] = useRecoilState(MinDonate);
-
+  const {addressOrName:contractAddress,contractInterface:XenWitchInterface} = useXenWitchContract()
+  const [functionMint] = useXenWitchOp()
 
   const contract = useMemo(() => {
     if (!address || !provider) return null;
@@ -93,7 +88,7 @@ function Page() {
   }, [address, provider]);
 
   const [amount, setAmount] = useState(10);
-  const [term, setTerm] = useState(0);
+  const [term, setTerm] = useState(1);
 
   const handleSetAmount = (ev) => {
     let amount = ev.target.value;
@@ -132,7 +127,7 @@ function Page() {
     mode: "recklesslyUnprepared",
     addressOrName: contractAddress,
     contractInterface: XenWitchInterface,
-    functionName: "mint",
+    functionName: functionMint,
     args: [amount, term],
     onError: (err) => {
       toast.error(err?.error?.message ?? err?.message)
@@ -156,7 +151,10 @@ function Page() {
       </div>
       <div className="container mx-auto">
         <div className="card bg-base-100 shadow-xl p-4 flex-1 mb-4" style={{ display: 'block' }}>
-          此版本为 <div className="badge badge-ghost" style={{ backgroundColor: 'orange' }}>BSC</div> 版本，
+          此版本为 
+          <div className="badge badge-ghost" style={{ backgroundColor: 'orange' }}>BSC</div> 
+          <div className="badge badge-ghost" style={{ backgroundColor: 'purple',color:'#fff' }}>Polygon</div>
+          版本，
           <div className="badge badge-info" >ETH</div> 请使用<a href="https://xen.web3box.dev" className="link"> https://xen.web3box.dev</a>
         </div>
         <div className="flex gap-4"> 
@@ -181,7 +179,7 @@ function Page() {
                 <span className="label-text">锁定时间</span>
                 <span className="label-text-alt">天数</span>
               </label>
-              <input type="number" min={0} value={term} onChange={handleSetTerm} className="input input-bordered w-full max-w-xs input-sm" />
+              <input type="number" min={1} value={term} onChange={handleSetTerm} className="input input-bordered w-full max-w-xs input-sm" />
               <label className="label">
                 <span className="label-text">如果为0，则为递增模式，比如数量是4，那么会有四个地址依次mint时间为1,2,3,4天锁定。</span>
               </label>
@@ -199,19 +197,6 @@ function Page() {
             </div>
             <div>
               如有使用问题请加入SafeHouseDAO进行反馈，https://discord.gg/vqRrQBge8S
-            </div>
-            <div
-              style={{
-                color: "red",
-              }}
-            >
-              如果你在10月10日
-              早上10点前使用过此工具，并且你当时的地址消失不见，说明你是用的是旧版本。
-              请到{" "}
-              <a href="https://discord.com/invite/vqRrQBge8S">
-                <button className="btn btn-link">@SafeHouseDAO</button>
-              </a>{" "}
-              查看旧版本的地址。
             </div>
             <div className="big-text">Xen Crypto 批量工具</div>
             <div className="big-text">注意不要使用别人修改的版本，后果自负</div>

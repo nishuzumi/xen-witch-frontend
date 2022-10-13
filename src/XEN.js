@@ -1068,4 +1068,4 @@ export const XENABI = [
 
 export const XENInterface = new ethers.utils.Interface(XENABI);
 
-export const XENAddress = "0x2ab0e9e4ee70fff1fb9d67031e44f6410170d00e";
+// export const XENAddress = "0x2ab0e9e4ee70fff1fb9d67031e44f6410170d00e";

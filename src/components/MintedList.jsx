@@ -1,5 +1,4 @@
 import { constants } from "ethers";
-import { getContractAddress } from "ethers/lib/utils";
 import React, { useEffect, useMemo, useState } from 'react';
 import toast from "react-hot-toast";
 import { useRecoilValue } from "recoil";
@@ -11,14 +10,12 @@ import {
     MinDonate
 } from "../store";
 import "../styles.css";
-import { XENAddress, XENInterface } from "../XEN";
-import {
-    generateClaim
-} from "../XenWitch";
+import { XENInterface } from "../XEN";
 import { calculateMintReward, getContractAddressCreate2 } from '../helper'
-import { xenWitchContract } from "../XenWitch";
 import { Card } from "./Card";
 import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im"
+import { useXenWitchContract, useXenWitchOp } from "../hooks/useXenWitchContract";
+import { useXenContractAddress } from "../hooks/useXenContract";
 export function MintedList() {
     const { address } = useAccount();
     const globalMinDonate = useRecoilValue(MinDonate);
@@ -26,6 +23,9 @@ export function MintedList() {
     const [addresses, setAddresses] = useState(new Map);
     const [page, setPage] = useState(0)
     const [showClaimable, setShowClaimable] = useState(false)
+    const xenWitchContract = useXenWitchContract()
+    const XENAddress = useXenContractAddress()
+    const [_,functionClaim] = useXenWitchOp()
 
     const b = useMemo(() => {
         const search = new URLSearchParams(window.location.search);
@@ -51,7 +51,7 @@ export function MintedList() {
         const newMap = new Map
         const max = Math.min(createCount, 100 * (page + 1))
         for (let i = 0 + 100 * page; i < max; i++) {
-            newMap.set(getContractAddressCreate2(b, i), i)
+            newMap.set(getContractAddressCreate2(xenWitchContract.addressOrName,b, i), i)
         }
         setAddresses(newMap)
     }, [createCount, b, page])
@@ -114,7 +114,7 @@ export function MintedList() {
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
-        functionName: "claim",
+        functionName: functionClaim,
         args: [claimAllData],
         overrides: {
             value: globalMinDonate,

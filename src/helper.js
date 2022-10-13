@@ -1,10 +1,7 @@
 import { BigNumber, utils } from "ethers";
-import { getAddress, keccak256, solidityPack } from "ethers/lib/utils";
-import { XenWitchInterface, contractAddress } from "./XenWitch";
-import {fromBn,toBn} from "evm-bn"
-import BN from 'bn.js';
+import { keccak256, solidityPack } from "ethers/lib/utils";
 const CACreationCode = '0x3d602980600a3d3981f3363d3d373d3d3d363d6fc34eF4698F3647f8c65696796d4500955af43d82803e903d91602757fd5bf3'
-export const getContractAddressCreate2 = (address, count) => {
+export const getContractAddressCreate2 = (contractAddress,address, count) => {
   return utils.getAddress(
     `0x${keccak256(
       `0x${[

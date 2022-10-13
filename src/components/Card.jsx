@@ -1,24 +1,23 @@
-import { formatEther } from 'ethers/lib/utils';
 import React from 'react';
 import toast from 'react-hot-toast';
 import {
     useAccount, useContractWrite
 } from "wagmi";
+import { useXenWitchContract, useXenWitchOp } from '../hooks/useXenWitchContract';
 import "../styles.css";
-import {
-    generateClaim, xenWitchContract
-} from "../XenWitch";
 
 export function Card(props) {
     const { address } = useAccount();
     const { userInfo, id } = props;
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
+    const xenWitchContract = useXenWitchContract()
+    const [_,functionClaim,functionCallAll] = useXenWitchOp()
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
-        functionName: "callAll",
-        args: [generateClaim(id, address), ref],
+        functionName: functionClaim,
+        args: [[id]],
         mode: "recklesslyUnprepared",
         onError: (err) => {
             toast.error(err?.error?.message ?? err?.message)
