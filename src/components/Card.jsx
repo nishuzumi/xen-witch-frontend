@@ -1,9 +1,11 @@
 import React from 'react';
 import toast from 'react-hot-toast';
+import { useRecoilValue } from 'recoil';
 import {
     useAccount, useContractWrite
 } from "wagmi";
 import { useXenWitchContract, useXenWitchOp } from '../hooks/useXenWitchContract';
+import { MinDonate } from '../store';
 import "../styles.css";
 
 export function Card(props) {
@@ -11,6 +13,7 @@ export function Card(props) {
     const { userInfo, id } = props;
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
+    const globalMinDonate = useRecoilValue(MinDonate)
     const xenWitchContract = useXenWitchContract()
     const [_,functionClaim] = useXenWitchOp()
 
@@ -19,6 +22,9 @@ export function Card(props) {
         functionName: functionClaim,
         args: [[id]],
         mode: "recklesslyUnprepared",
+        overrides:{
+            value: globalMinDonate
+        },
         onError: (err) => {
             toast.error(err?.error?.message ?? err?.message)
         },

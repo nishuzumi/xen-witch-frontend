@@ -1,27 +1,28 @@
+import { Dialog } from '@headlessui/react';
 import { constants } from "ethers";
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import toast from "react-hot-toast";
+import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im";
 import { useRecoilValue } from "recoil";
 import {
-    useAccount, useContractRead, useContractReads,
-    useContractWrite
+    useAccount, useContractRead, useContractWrite
 } from "wagmi";
+import { calculateMintReward } from '../helper';
+import { useMintedList } from "../hooks/mintedList";
+import { useXenContractAddress } from "../hooks/useXenContract";
+import { useXenWitchContract, useXenWitchOp } from "../hooks/useXenWitchContract";
 import {
     MinDonate
 } from "../store";
 import "../styles.css";
 import { XENInterface } from "../XEN";
-import { calculateMintReward, getContractAddressCreate2 } from '../helper'
 import { Card } from "./Card";
-import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im"
-import { useXenWitchContract, useXenWitchOp } from "../hooks/useXenWitchContract";
-import { useXenContractAddress } from "../hooks/useXenContract";
 
 export function MintedList() {
-    const { address } = useAccount();
+    const { address } = useAccount()
     const globalMinDonate = useRecoilValue(MinDonate);
     const [loading, setLoading] = useState(false);
-    const [addresses, setAddresses] = useState(new Map);
+
     const [showClaimable, setShowClaimable] = useState(false)
     const xenWitchContract = useXenWitchContract()
     const XENAddress = useXenContractAddress()
@@ -32,12 +33,7 @@ export function MintedList() {
         return search.get('b') ?? address
     }, [window.location.search, address])
 
-    const { data: createCount } = useContractRead({
-        ...xenWitchContract,
-        functionName: 'createCount',
-        args: [b],
-        watch: true
-    })
+    const { data, isLoadingAddressStatus, refetchAddressStatus, addresses } = useMintedList(b)
 
     const { data: globalRank } = useContractRead({
         addressOrName: XENAddress,
@@ -45,37 +41,6 @@ export function MintedList() {
         functionName: 'globalRank',
         watch: true
     })
-    useEffect(() => {
-        if (createCount == addresses.length) return
-        const newMap = new Map
-        for (let i = 0; i < createCount; i++) {
-            newMap.set(getContractAddressCreate2(xenWitchContract.addressOrName, b, i), i)
-        }
-        setAddresses(newMap)
-    }, [createCount, b])
-
-    const readContracts = useMemo(() => {
-        const list = [];
-        for (const addr of addresses.keys()) {
-            list.push({
-                addressOrName: XENAddress,
-                contractInterface: XENInterface,
-                functionName: "userMints",
-                args: [addr],
-            });
-        }
-        return list;
-    }, [addresses]);
-
-    const {
-        data,
-        refetch: refetchAddressStatus,
-        isLoading: isLoadingAddressStatus,
-    } = useContractReads({
-        enabled: readContracts.length > 0,
-        contracts: readContracts,
-        allowFailure: true,
-    });
 
     const list = useMemo(() => {
         if (data) {
@@ -146,6 +111,31 @@ export function MintedList() {
 
     return (
         <div className="mt-8">
+            <input type="checkbox" id="remint-model" className="modal-toggle" />
+            <label htmlFor="remint-model" className="modal cursor-pointer">
+                <label className="modal-box relative" for="">
+                    <h3 className="text-lg font-bold">已有地址重Mint</h3>
+                    <p className="py-4">
+                        你当前有{emptyList.length}个地址未Mint，点击下方按钮进行Mint。
+                        <div className="form-control w-full max-w-xs">
+                            <label className="label">
+                                <span className="label-text">锁定时间</span>
+                                <span className="label-text-alt">天数</span>
+                            </label>
+                            <input type="number" min={0} className="input input-bordered w-full max-w-xs input-sm" />
+                            <label className="label">
+                                <span className="label-text">如果为0，则为递增模式，比如数量是4，那么会有四个地址依次mint时间为1,2,3,4天锁定。</span>
+                            </label>
+                        </div>
+                        <div className="divider" />
+                        <div className="form-control w-full max-w-xs">
+                            <button  className='btn btn-primary'>
+                                进行批量Mint攻击 (Witch Mint)
+                            </button>
+                        </div>
+                    </p>
+                </label>
+            </label>
             <div
                 className="flex justify-between"
                 style={{
@@ -157,16 +147,16 @@ export function MintedList() {
                         批量提取奖励
                     </button>
                 </div>
-                <div className="btn-group">
-                    <button disabled={emptyList == 0} className="btn gap-2 btn-sm btn-accent">
+                <div className="btn-group ">
+                    <label htmlFor="remint-model" className="btn gap-2 btn-sm btn-accent text-gray-50">
                         空地址重置Mint
-                    </button>
-                    <button className="btn gap-2 btn-sm btn-accent" onClick={handleSwitchClaimable}>
+                    </label>
+                    <button className="btn gap-2 btn-sm btn-accent text-gray-50" onClick={handleSwitchClaimable}>
                         {showClaimable ? <ImCheckboxChecked /> : <ImCheckboxUnchecked />} 只显示可提取
                     </button>
                 </div>
             </div>
-            <div className="card-list overflow-scroll" style={{maxHeight:'800px'}}>
+            <div className="card-list overflow-scroll" style={{ maxHeight: '800px' }}>
                 {isLoadingAddressStatus ? <div className="w-full h-48 flex justify-center items-center">
                     <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-gray" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
