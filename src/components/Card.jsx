@@ -12,7 +12,7 @@ export function Card(props) {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
     const xenWitchContract = useXenWitchContract()
-    const [_,functionClaim,functionCallAll] = useXenWitchOp()
+    const [_,functionClaim] = useXenWitchOp()
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
