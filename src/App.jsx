@@ -85,7 +85,7 @@ function Page() {
   const contract = useMemo(() => {
     if (!address || !provider) return null;
     return new ethers.Contract(contractAddress, XenWitchInterface, provider);
-  }, [address, provider]);
+  }, [address, provider,XenWitchInterface]);
 
   const [amount, setAmount] = useState(10);
   const [term, setTerm] = useState(1);

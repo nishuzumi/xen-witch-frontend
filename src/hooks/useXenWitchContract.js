@@ -23,8 +23,10 @@ export function useXenWitchContract() {
     switch (chainId) {
         case 56:
             contractInterface = XenWitchABI
+            break
         case chain.polygon.id:
             contractInterface = XenWichABIPolygon
+            break
         default:
             undefined
     }

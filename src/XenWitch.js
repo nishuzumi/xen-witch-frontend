@@ -234,7 +234,7 @@ export const XenWitchABI = [
     stateMutability: "payable",
     type: "receive",
   },
-]
+];
 
 export const XenWichABIPolygon = [
   {

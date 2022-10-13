@@ -22,7 +22,6 @@ const MAX_PENALTY_PCT = 99
 
 export const calculateMintReward = (globalRank, info) => {
   if (!globalRank) return 0
-  console.log(globalRank,info)
   const {
     rank,
     term,
