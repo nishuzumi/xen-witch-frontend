@@ -76,7 +76,7 @@ export function MintedList() {
             })
             .map((i) => addresses.get(i["user"]))
             .slice(0, bulkMint);
-    }, [list]);
+    }, [list,bulkMint]);
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
