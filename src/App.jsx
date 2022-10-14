@@ -65,23 +65,24 @@ const { chains, provider } = configureChains(
       blockCreated: 14353601
     }
   },
-  {
-    id: 43114,
-    name: 'AVAX',
-    rpcUrls: {
-      default: 'https://api.avax.network/ext/bc/C/rpc'
-    },
-    nativeCurrency: {
-      name: 'Avalanche',
-      symbol: 'AVAX',
-      decimals: 18
-    },
-    blockExplorerUrls: ['https://snowtrace.io'],
-    multicall: {
-      address: '0xcA11bde05977b3631167028862bE2a173976CA11',
-      blockCreated: 14353601
-    }
-  }],
+    // {
+    //   id: 43114,
+    //   name: 'AVAX',
+    //   rpcUrls: {
+    //     default: 'https://api.avax.network/ext/bc/C/rpc'
+    //   },
+    //   nativeCurrency: {
+    //     name: 'Avalanche',
+    //     symbol: 'AVAX',
+    //     decimals: 18
+    //   },
+    //   blockExplorerUrls: ['https://snowtrace.io'],
+    //   multicall: {
+    //     address: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    //     blockCreated: 14353601
+    //   }
+    // }
+  ],
   [publicProvider()]
 );
 
