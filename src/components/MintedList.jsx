@@ -68,21 +68,15 @@ export function MintedList() {
         return [];
     }, [data]);
 
-    const claimAllData = useMemo(() => {
+    const canClaim = useMemo(() => {
         const now = +new Date();
-        return list
-            .filter((info) => {
-                return info["maturityTs"].toNumber() * 1000 < now;
-            })
-            .map((i) => addresses.get(i["user"]))
-            .slice(0, bulkMint);
-    }, [list,bulkMint]);
+        return list.find((u) => now > u["maturityTs"].toNumber() * 1000);
+    }, [list, bulkMint]);
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
         enabled: false,
         functionName: functionClaim,
-        args:[claimAllData],
         overrides: {
             value: globalMinDonate,
         },
@@ -90,15 +84,24 @@ export function MintedList() {
     });
 
     const canOneClick = useMemo(() => {
-        return claimAllData.length > 0 && !isLoadingAddressStatus && !loading;
-    }, [claimAllData, isLoadingAddressStatus, loading]);
+        return canClaim && !isLoadingAddressStatus && !loading;
+    }, [canClaim, isLoadingAddressStatus, loading]);
 
     const handleOneClick = () => {
         setLoading(true);
-        writeAsync().then((tx) => {
+        const now = +new Date();
+        const claimData = list
+            .filter((info) => {
+                return info["maturityTs"].toNumber() * 1000 < now;
+            })
+            .map((i) => addresses.get(i["user"]))
+            .slice(0, bulkMint);
+        writeAsync({
+            recklesslySetUnpreparedArgs:[claimData]
+        }).then((tx) => {
             toast.success("交易发送成功\n" + `hash: ${tx.hash}`)
             return tx.wait().then(refetchAddressStatus())
-        }).catch(err=>{
+        }).catch(err => {
             toast.error(err?.error?.message ?? err?.message + '\n' + err?.data?.message)
         }).finally(() => {
             setLoading(false);
@@ -119,7 +122,7 @@ export function MintedList() {
                 }}
             >
                 <div>
-                    <input type='number' value={bulkMint} className='input input-sm w-24 mr-2 input-bordered' onChange={(e)=>setBulkMint(e.target.value)}/>
+                    <input type='number' value={bulkMint} className='input input-sm w-24 mr-2 input-bordered' onChange={(e) => setBulkMint(parseInt(e.target.value, 10))} />
                     <button disabled={!canOneClick} className='btn btn-primary btn-sm' onClick={handleOneClick}>
                         批量提取奖励
                     </button>
