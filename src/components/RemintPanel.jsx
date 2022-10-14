@@ -23,9 +23,6 @@ export function RemintPanel(props) {
         overrides: {
             value: globalMinDonate
         },
-        // onError: (err) => {
-            
-        // }
     })
 
     const hanldeChangeTimes = (e) => {
@@ -33,7 +30,7 @@ export function RemintPanel(props) {
         setTimes(value)
     }
     const handleChangeTerm = (e) => {
-        const value = Math.min(e.target.value, 1)
+        const value = Math.max(e.target.value, 1)
         setTerm(value)
     }
 
