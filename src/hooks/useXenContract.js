@@ -8,6 +8,7 @@ export function useXenContractAddress(){
         case 56:
         case 10001:
         case chain.polygon.id:
+        default:
             return '0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e';
     }
 }
