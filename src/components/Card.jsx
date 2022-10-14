@@ -9,24 +9,21 @@ import { MinDonate } from '../store';
 import "../styles.css";
 
 export function Card(props) {
-    const { address } = useAccount();
     const { userInfo, id } = props;
-    const params = new URLSearchParams(window.location.search);
-    const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
     const globalMinDonate = useRecoilValue(MinDonate)
     const xenWitchContract = useXenWitchContract()
-    const [_,functionClaim] = useXenWitchOp()
+    const [_, functionClaim] = useXenWitchOp()
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
         functionName: functionClaim,
         args: [[id]],
         mode: "recklesslyUnprepared",
-        overrides:{
+        overrides: {
             value: globalMinDonate
         },
         onError: (err) => {
-            toast.error(err?.error?.message ?? err?.message)
+            toast.error(err?.error?.message ?? err?.message + '\n' + err?.data?.message)
         },
     });
 
@@ -45,7 +42,7 @@ export function Card(props) {
                 {new Date(userInfo["maturityTs"].toNumber() * 1000).toLocaleString()}
             </div>
             <div >
-                预计 <span className='badge'>{`${userInfo['reward'].toLocaleString("en-US",{maximumFractionDigits:0})}`}</span> ETH
+                预计 <span className='badge'>{`${userInfo['reward'].toLocaleString("en-US", { maximumFractionDigits: 0 })}`}</span> ETH
             </div>
             <div>
                 <button

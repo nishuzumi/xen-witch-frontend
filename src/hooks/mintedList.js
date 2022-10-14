@@ -17,12 +17,11 @@ export function useMintedList(b) {
         watch: true
     })
     const [page, setPage] = useState(0)
-
+    const perPage = 1000;
 
     useEffect(() => {
         if (createCount == addresses.length) return
         const newMap = new Map
-        const perPage = 2000;
         const max = Math.min(createCount, perPage * (page + 1))
         for (let i = page * perPage; i < max; i++) {
             newMap.set(getContractAddressCreate2(xenWitchContract.addressOrName, b, i), i)
@@ -63,6 +62,6 @@ export function useMintedList(b) {
 
     return {
         addresses, data, refetchAddressStatus, isLoadingAddressStatus,
-        page, setPage, maxPage: Math.ceil(createCount / 2000)
+        page, setPage, maxPage: Math.floor(createCount / perPage)
     }
 }

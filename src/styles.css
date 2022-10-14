@@ -44,7 +44,10 @@ body {
   flex-basis: 180px;
   flex-grow: 1;
   flex-shrink: 0;
-  height: 144px;
-  width: 202px;
-  contain-intrinsic-size: 202px;
+  display: flex;
+  flex-direction: column;
+  height: 160px;
+  width: 220px;
+  align-items: center;
+  justify-content: center;
 }

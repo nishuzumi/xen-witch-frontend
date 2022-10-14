@@ -29,6 +29,8 @@ export function MintedList() {
     const XENAddress = useXenContractAddress()
     const [_, functionClaim] = useXenWitchOp()
 
+    const [bulkMint, setBulkMint] = useState(100)
+
     const b = useMemo(() => {
         const search = new URLSearchParams(window.location.search);
         return search.get('b') ?? address
@@ -73,7 +75,7 @@ export function MintedList() {
                 return info["maturityTs"].toNumber() * 1000 < now;
             })
             .map((i) => addresses.get(i["user"]))
-            .slice(0, 1000);;
+            .slice(0, bulkMint);
     }, [list]);
 
     const { writeAsync } = useContractWrite({
@@ -122,6 +124,7 @@ export function MintedList() {
                 }}
             >
                 <div>
+                    <input type='number' value={bulkMint} className='input input-sm w-24 mr-2 input-bordered' onChange={(e)=>setBulkMint(e.target.value)}/>
                     <button disabled={!canOneClick} className='btn btn-primary btn-sm' onClick={handleOneClick}>
                         批量提取奖励
                     </button>
