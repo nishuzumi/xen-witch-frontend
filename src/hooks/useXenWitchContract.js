@@ -47,6 +47,7 @@ export function useXenWitchOp() {
     switch (chainId) {
         case 56:
             return ['mint', 'claim', 'callAll']
+        case 10001:
         case chain.polygon.id:
             return ['mintAll', 'claimAll', 'callAll']
         default:
