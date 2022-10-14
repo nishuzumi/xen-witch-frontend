@@ -195,7 +195,6 @@ function Page() {
           <div className="badge badge-ghost" style={{ backgroundColor: 'orange' }}>BSC</div>
           <div className="badge badge-ghost" style={{ backgroundColor: 'purple', color: '#fff' }}>Polygon</div>
           <div className="badge badge-ghost" style={{ backgroundColor: 'blue', color: '#fff' }}>ETHW</div>
-          <div className="badge badge-ghost" style={{ backgroundColor: '#d64f49', color: '#fff' }}>AVAX</div>
           版本，
           <div className="badge badge-info" >ETH</div> 请使用<a href="https://xen.web3box.dev" className="link"> https://xen.web3box.dev</a>
         </div>
