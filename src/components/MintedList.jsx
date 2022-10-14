@@ -122,9 +122,13 @@ export function MintedList() {
                 }}
             >
                 <div>
-                    <input type='number' value={bulkMint} className='input input-sm w-24 mr-2 input-bordered' onChange={(e) => setBulkMint(parseInt(e.target.value, 10))} />
+                    <input type='number' value={bulkMint} className='input input-sm w-24 mr-2 input-bordered'
+                     onChange={(e) => {
+                        const v = Math.min(parseInt(e.target.value,10,200))
+                        setBulkMint(v, 10)}
+                     } />
                     <button disabled={!canOneClick} className='btn btn-primary btn-sm' onClick={handleOneClick}>
-                        批量提取奖励
+                        批量提取奖励(最大200)
                     </button>
                 </div>
                 <div >
