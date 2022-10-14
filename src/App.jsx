@@ -64,6 +64,23 @@ const { chains, provider } = configureChains(
       address: '0xcA11bde05977b3631167028862bE2a173976CA11',
       blockCreated: 14353601
     }
+  },
+  {
+    id: 43114,
+    name: 'AVAX',
+    rpcUrls: {
+      default: 'https://api.avax.network/ext/bc/C/rpc'
+    },
+    nativeCurrency: {
+      name: 'Avalanche',
+      symbol: 'AVAX',
+      decimals: 18
+    },
+    blockExplorerUrls: ['https://snowtrace.io'],
+    multicall: {
+      address: '0xcA11bde05977b3631167028862bE2a173976CA11',
+      blockCreated: 14353601
+    }
   }],
   [publicProvider()]
 );
@@ -138,7 +155,7 @@ function Page() {
 
   useEffect(() => {
     if (!minDonate) return;
-    if (chain?.id === 10001) {
+    if (chain?.id !== 56 && chain?.id !== 137) {
       setGlobalMinDonate(0)
     } else {
       setGlobalMinDonate(minDonate.toString());
@@ -177,6 +194,7 @@ function Page() {
           <div className="badge badge-ghost" style={{ backgroundColor: 'orange' }}>BSC</div>
           <div className="badge badge-ghost" style={{ backgroundColor: 'purple', color: '#fff' }}>Polygon</div>
           <div className="badge badge-ghost" style={{ backgroundColor: 'blue', color: '#fff' }}>ETHW</div>
+          <div className="badge badge-ghost" style={{ backgroundColor: '#d64f49', color: '#fff' }}>AVAX</div>
           版本，
           <div className="badge badge-info" >ETH</div> 请使用<a href="https://xen.web3box.dev" className="link"> https://xen.web3box.dev</a>
         </div>

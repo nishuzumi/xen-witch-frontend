@@ -10,9 +10,8 @@ export function useXenWitchContractAddress() {
             return '0xeED210f13C6aeBF3aF2f80377C73A9e60f14BeEc'
         case 10001:
         case chain.polygon.id:
-            return '0x00000000c34eF4698F3647f8c65696796d450095';
         default:
-            return undefined;
+            return '0x00000000c34eF4698F3647f8c65696796d450095';
     }
 }
 
@@ -27,10 +26,9 @@ export function useXenWitchContract() {
             break
         case 10001:
         case chain.polygon.id:
+        default:
             contractInterface = XenWichABIPolygon
             break
-        default:
-            undefined
     }
     if (!contractInterface) {
         return {}
@@ -49,8 +47,7 @@ export function useXenWitchOp() {
             return ['mint', 'claim', 'callAll']
         case 10001:
         case chain.polygon.id:
-            return ['mintAll', 'claimAll', 'callAll']
         default:
-            return []
+            return ['mintAll', 'claimAll', 'callAll']
     }
 }
