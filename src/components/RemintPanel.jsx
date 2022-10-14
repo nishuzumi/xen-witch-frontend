@@ -26,7 +26,7 @@ export function RemintPanel(props) {
     })
 
     const hanldeChangeTimes = (e) => {
-        const value = Math.max(Math.min(e.target.value, 1), Math.min(emptyList.length, 100))
+        const value = Math.max(Math.min(e.target.value, 1), Math.min(emptyList.length, 500))
         setTimes(value)
     }
     const handleChangeTerm = (e) => {
