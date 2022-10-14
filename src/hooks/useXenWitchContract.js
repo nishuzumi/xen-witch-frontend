@@ -8,6 +8,7 @@ export function useXenWitchContractAddress() {
     switch (chainId) {
         case 56:
             return '0xeED210f13C6aeBF3aF2f80377C73A9e60f14BeEc'
+        case 10001:
         case chain.polygon.id:
             return '0x00000000c34eF4698F3647f8c65696796d450095';
         default:
@@ -24,13 +25,14 @@ export function useXenWitchContract() {
         case 56:
             contractInterface = XenWitchABI
             break
+        case 10001:
         case chain.polygon.id:
             contractInterface = XenWichABIPolygon
             break
         default:
             undefined
     }
-    if(!contractInterface){
+    if (!contractInterface) {
         return {}
     }
     return {

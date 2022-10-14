@@ -12,6 +12,7 @@ import {
   createClient,
   useAccount,
   useContractRead, useContractWrite,
+  useNetwork,
   useProvider,
   WagmiConfig
 } from "wagmi";
@@ -31,7 +32,7 @@ Sentry.init({
 });
 
 const { chains, provider } = configureChains(
-  [chain.polygon,{
+  [chain.polygon, {
     id: 56,
     name: 'BSC',
     rpcUrls: {
@@ -46,6 +47,22 @@ const { chains, provider } = configureChains(
     multicall: {
       address: '0xcA11bde05977b3631167028862bE2a173976CA11',
       blockCreated: 15921452
+    }
+  }, {
+    id: 10001,
+    name: 'ETHW',
+    rpcUrls: {
+      default: 'https://mainnet.ethereumpow.org'
+    },
+    nativeCurrency: {
+      name: 'ETHW',
+      symbol: 'ETHW',
+      decimals: 18
+    },
+    blockExplorerUrls: ['https://mainnet.ethwscan.com'],
+    multicall: {
+      address: '0xcA11bde05977b3631167028862bE2a173976CA11',
+      blockCreated: 14353601
     }
   }],
   [publicProvider()]
@@ -77,15 +94,16 @@ export default function App() {
 
 function Page() {
   const { address } = useAccount();
+  const { chain } = useNetwork()
   const provider = useProvider();
   const [__, setGlobalMinDonate] = useRecoilState(MinDonate);
-  const {addressOrName:contractAddress,contractInterface:XenWitchInterface} = useXenWitchContract()
+  const { addressOrName: contractAddress, contractInterface: XenWitchInterface } = useXenWitchContract()
   const [functionMint] = useXenWitchOp()
 
   const contract = useMemo(() => {
     if (!address || !provider || !XenWitchInterface) return null;
     return new ethers.Contract(contractAddress, XenWitchInterface, provider);
-  }, [address, provider,XenWitchInterface]);
+  }, [address, provider, XenWitchInterface]);
 
   const [amount, setAmount] = useState(10);
   const [term, setTerm] = useState(1);
@@ -120,7 +138,11 @@ function Page() {
 
   useEffect(() => {
     if (!minDonate) return;
-    setGlobalMinDonate(minDonate.toString());
+    if (chain?.id === 10001) {
+      setGlobalMinDonate(0)
+    } else {
+      setGlobalMinDonate(minDonate.toString());
+    }
   }, [minDonate]);
 
   const { writeAsync } = useContractWrite({
@@ -151,13 +173,14 @@ function Page() {
       </div>
       <div className="container mx-auto">
         <div className="card bg-base-100 shadow-xl p-4 flex-1 mb-4" style={{ display: 'block' }}>
-          此版本为 
-          <div className="badge badge-ghost" style={{ backgroundColor: 'orange' }}>BSC</div> 
-          <div className="badge badge-ghost" style={{ backgroundColor: 'purple',color:'#fff' }}>Polygon</div>
+          此版本为
+          <div className="badge badge-ghost" style={{ backgroundColor: 'orange' }}>BSC</div>
+          <div className="badge badge-ghost" style={{ backgroundColor: 'purple', color: '#fff' }}>Polygon</div>
+          <div className="badge badge-ghost" style={{ backgroundColor: 'blue', color: '#fff' }}>ETHW</div>
           版本，
           <div className="badge badge-info" >ETH</div> 请使用<a href="https://xen.web3box.dev" className="link"> https://xen.web3box.dev</a>
         </div>
-        <div className="flex gap-4"> 
+        <div className="flex gap-4">
           {allReady && <div style={{ maxWidth: '360px' }} className='card shadow-xl p-4'>
             <div className="form-control w-full max-w-xs">
               <label className="label">

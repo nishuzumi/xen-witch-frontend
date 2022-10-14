@@ -6,7 +6,7 @@ export function useXenContractAddress(){
     const chainId = currentChain?.id
     switch(chainId){
         case 56:
-            return '0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e'
+        case 10001:
         case chain.polygon.id:
             return '0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e';
     }
