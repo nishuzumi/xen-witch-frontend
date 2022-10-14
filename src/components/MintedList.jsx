@@ -82,19 +82,11 @@ export function MintedList() {
         ...xenWitchContract,
         enabled: false,
         functionName: functionClaim,
+        args:[claimAllData],
         overrides: {
             value: globalMinDonate,
         },
         mode: "recklesslyUnprepared",
-        onSuccess: (tx) => {
-            tx.wait().then(async () => {
-                await refetchAddressStatus();
-                setLoading(false);
-            });
-        },
-        onError: (err) => {
-            toast.error(err?.error?.message ?? err?.message)
-        },
     });
 
     const canOneClick = useMemo(() => {
@@ -103,10 +95,13 @@ export function MintedList() {
 
     const handleOneClick = () => {
         setLoading(true);
-        writeAsync({
-            recklesslySetUnpreparedArgs: [claimAllData]
-        }).then((tx) => {
+        writeAsync().then((tx) => {
             toast.success("交易发送成功\n" + `hash: ${tx.hash}`)
+            return tx.wait().then(refetchAddressStatus())
+        }).catch(err=>{
+            toast.error(err?.error?.message ?? err?.message + '\n' + err?.data?.message)
+        }).finally(() => {
+            setLoading(false);
         });
     };
 
