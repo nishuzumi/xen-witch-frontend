@@ -116,10 +116,7 @@ export function MintedList() {
         <div className="mt-8">
             <RemintPanel emptyList={emptyList} refetchAddressStatus={refetchAddressStatus} />
             <div
-                className="flex justify-between"
-                style={{
-                    display: "flex",
-                }}
+                className="flex justify-center md:justify-between flex-wrap md:flex-nowrap"
             >
                 <div>
                     <input type='number' value={bulkMint} className='input input-sm w-24 mr-2 input-bordered'

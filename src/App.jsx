@@ -198,9 +198,9 @@ function Page() {
           版本，
           <div className="badge badge-info" >ETH</div> 请使用<a href="https://xen.web3box.dev" className="link"> https://xen.web3box.dev</a>
         </div>
-        <div className="flex gap-4">
-          {allReady && <div style={{ maxWidth: '360px' }} className='card shadow-xl p-4'>
-            <div className="form-control w-full max-w-xs">
+        <div className="flex gap-4 md:flex-nowrap flex-wrap">
+          {allReady && <div className='card shadow-xl p-4 md:max-w-xs w-full items-center'>
+            <div className="form-control max-w-xs w-full">
               <label className="label">
                 <span className="label-text">数量</span>
                 <span className="label-text-alt">需要批量Mint的数量</span>
