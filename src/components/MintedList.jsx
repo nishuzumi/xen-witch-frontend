@@ -36,7 +36,7 @@ export function MintedList() {
         return search.get('b') ?? address
     }, [window.location.search, address])
 
-    const { data, isLoadingAddressStatus, refetchAddressStatus, addresses, page, setPage, maxPage } = useMintedList(b)
+    const { data, isLoadingAddressStatus, refetchAddressStatus, addresses, page, setPage, maxPage,createCount } = useMintedList(b)
 
     const { data: globalRank } = useContractRead({
         addressOrName: XENAddress,
@@ -97,7 +97,7 @@ export function MintedList() {
             .map((i) => addresses.get(i["user"]))
             .slice(0, bulkMint);
         writeAsync({
-            recklesslySetUnpreparedArgs:[claimData]
+            recklesslySetUnpreparedArgs: [claimData]
         }).then((tx) => {
             toast.success("交易发送成功\n" + `hash: ${tx.hash}`)
             return tx.wait().then(refetchAddressStatus())
@@ -114,7 +114,7 @@ export function MintedList() {
 
     return (
         <div className="mt-8">
-            <RemintPanel emptyList={emptyList} />
+            <RemintPanel emptyList={emptyList} refetchAddressStatus={refetchAddressStatus} />
             <div
                 className="flex justify-between"
                 style={{
@@ -127,20 +127,23 @@ export function MintedList() {
                         批量提取奖励
                     </button>
                 </div>
-                <div className="btn-group ">
-                    <label htmlFor="remint-model" disabled={emptyList.length == 0} className="btn gap-2 btn-sm">
-                        {emptyList.length}个地址重置Mint
-                    </label>
-                    <button className="btn gap-2 btn-sm" onClick={handleSwitchClaimable}>
-                        {showClaimable ? <ImCheckboxChecked /> : <ImCheckboxUnchecked />} 只显示可提取
-                    </button>
+                <div >
+                    <span className='mr-4'>总数量: <span className='badge'>{createCount}</span></span>
+                    <div className="btn-group">
+                        <label htmlFor="remint-model" disabled={emptyList.length == 0} className="btn gap-2 btn-sm">
+                            {emptyList.length}个地址重置Mint
+                        </label>
+                        <button className="btn gap-2 btn-sm" onClick={handleSwitchClaimable}>
+                            {showClaimable ? <ImCheckboxChecked /> : <ImCheckboxUnchecked />} 只显示可提取
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className="card-list overflow-scroll" style={{ maxHeight: '800px' }}>
                 {isLoadingAddressStatus ? <div className="w-full h-48 flex justify-center items-center">
-                    <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-gray" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </div> : ''}
                 {list
@@ -154,8 +157,9 @@ export function MintedList() {
                     : ""}
             </div>
             <div className="btn-group mt-8">
-                <button className="btn" disabled={page == 0} onClick={() => { setPage(page - 1) }}>«</button>
-                <button className="btn" disabled={page == maxPage} onClick={() => { setPage(page + 1) }}>»</button>
+                <button className="btn" disabled={page == 0 || isLoadingAddressStatus} onClick={() => { setPage(page - 1) }}>«</button>
+                <button className="btn">第 {page + 1} 页</button>
+                <button className="btn" disabled={page == maxPage || isLoadingAddressStatus} onClick={() => { setPage(page + 1) }}>»</button>
             </div>
         </div>
     );

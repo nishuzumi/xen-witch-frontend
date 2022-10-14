@@ -7,7 +7,7 @@ import { useXenWitchContract, useXenWitchOp } from "../hooks/useXenWitchContract
 import { MinDonate } from "../store"
 
 export function RemintPanel(props) {
-    const { emptyList } = props
+    const { emptyList,refetchAddressStatus } = props
     const [times, setTimes] = useState(1)
     const [term, setTerm] = useState(1)
     const xenWitchContract = useXenWitchContract()
@@ -51,6 +51,7 @@ export function RemintPanel(props) {
             recklesslySetUnpreparedArgs: [data]
         }).then(async(tx) => tx.wait).catch(err=>{
             toast.error(err?.error?.message ?? err?.message)
+            return refetchAddressStatus()
         }).finally(()=>{
             setMintLoading(false)
         })

@@ -27,7 +27,7 @@ export function useMintedList(b) {
             newMap.set(getContractAddressCreate2(xenWitchContract.addressOrName, b, i), i)
         }
         setAddresses(newMap)
-    }, [createCount, b])
+    }, [createCount, b, page])
 
     const readContracts = useMemo(() => {
         const list = [];
@@ -62,6 +62,6 @@ export function useMintedList(b) {
 
     return {
         addresses, data, refetchAddressStatus, isLoadingAddressStatus,
-        page, setPage, maxPage: Math.floor(createCount / perPage)
+        page, setPage, maxPage: Math.floor(createCount / perPage),createCount
     }
 }
