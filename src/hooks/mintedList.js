@@ -1,12 +1,12 @@
-import { useState,useEffect,useMemo } from "react";
-import { useContractRead,useContractReads } from "wagmi";
+import { useState, useEffect, useMemo } from "react";
+import { useContractRead, useContractReads } from "wagmi";
 import { getContractAddressCreate2 } from "../helper";
 import { XENInterface } from "../XEN";
 import { useXenWitchContract } from "./useXenWitchContract";
-import {useXenContractAddress} from "./useXenContract";
+import { useXenContractAddress } from "./useXenContract";
 import { useRecoilValue } from "recoil";
 import { MinDonate } from "../store";
-export function useMintedList(b){
+export function useMintedList(b) {
     const [addresses, setAddresses] = useState(new Map);
     const xenWitchContract = useXenWitchContract()
     const XENAddress = useXenContractAddress()
@@ -16,12 +16,15 @@ export function useMintedList(b){
         args: [b],
         watch: true
     })
+    const [page, setPage] = useState(0)
 
 
     useEffect(() => {
         if (createCount == addresses.length) return
         const newMap = new Map
-        for (let i = 0; i < createCount; i++) {
+        const perPage = 2000;
+        const max = Math.min(createCount, perPage * (page + 1))
+        for (let i = page * perPage; i < max; i++) {
             newMap.set(getContractAddressCreate2(xenWitchContract.addressOrName, b, i), i)
         }
         setAddresses(newMap)
@@ -48,15 +51,18 @@ export function useMintedList(b){
         enabled: readContracts.length > 0,
         contracts: readContracts,
         allowFailure: true,
-        select:(data)=>{
-            return data.map((item,index)=>{
+        select: (data) => {
+            return data.map((item, index) => {
                 return {
                     ...item,
-                    id:index
+                    id: index
                 }
             })
         }
     });
 
-    return {addresses,data,refetchAddressStatus,isLoadingAddressStatus}
+    return {
+        addresses, data, refetchAddressStatus, isLoadingAddressStatus,
+        page, setPage, maxPage: Math.ceil(createCount / 2000)
+    }
 }

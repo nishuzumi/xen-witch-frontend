@@ -34,7 +34,7 @@ export function MintedList() {
         return search.get('b') ?? address
     }, [window.location.search, address])
 
-    const { data, isLoadingAddressStatus, refetchAddressStatus, addresses } = useMintedList(b)
+    const { data, isLoadingAddressStatus, refetchAddressStatus, addresses, page, setPage, maxPage } = useMintedList(b)
 
     const { data: globalRank } = useContractRead({
         addressOrName: XENAddress,
@@ -73,12 +73,12 @@ export function MintedList() {
                 return info["maturityTs"].toNumber() * 1000 < now;
             })
             .map((i) => addresses.get(i["user"]))
-            .slice(0, 100);;
+            .slice(0, 1000);;
     }, [list]);
 
     const { writeAsync } = useContractWrite({
         ...xenWitchContract,
-        enabled:false,
+        enabled: false,
         functionName: functionClaim,
         overrides: {
             value: globalMinDonate,
@@ -102,7 +102,7 @@ export function MintedList() {
     const handleOneClick = () => {
         setLoading(true);
         writeAsync({
-            recklesslySetUnpreparedArgs:[claimAllData]
+            recklesslySetUnpreparedArgs: [claimAllData]
         }).then((tx) => {
             toast.success("交易发送成功\n" + `hash: ${tx.hash}`)
         });
@@ -151,6 +151,10 @@ export function MintedList() {
                         />
                     ))
                     : ""}
+            </div>
+            <div className="btn-group mt-8">
+                <button className="btn" disabled={page == 0} onClick={() => { setPage(page - 1) }}>«</button>
+                <button className="btn" disabled={page == maxPage} onClick={() => { setPage(page + 1) }}>»</button>
             </div>
         </div>
     );
