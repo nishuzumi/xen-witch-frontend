@@ -48,7 +48,7 @@ export function MintedList() {
     const list = useMemo(() => {
         if (data) {
             return data.filter(
-                (u) => u && u["user"] != constants.AddressZero && u["maturityTs"].gt(0) && (showClaimable ? +new Date() > u["maturityTs"].toNumber() * 1000 : true)
+                (u) => u && u["user"] != constants.AddressZero && u["maturityTs"]?.gt(0) && (showClaimable ? +new Date() > u["maturityTs"]?.toNumber() * 1000 : true)
             ).map(i => {
                 return {
                     ...i,
