@@ -17,7 +17,7 @@ export function useMintedList(b) {
         watch: true
     })
     const [page, setPage] = useState(0)
-    const perPage = 1000;
+    const perPage = 500;
 
     useEffect(() => {
         if (createCount == addresses.length) return
