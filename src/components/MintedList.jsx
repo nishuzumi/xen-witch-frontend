@@ -121,7 +121,7 @@ export function MintedList() {
                 <div>
                     <input type='number' value={bulkMint} className='input input-sm w-24 mr-2 input-bordered'
                      onChange={(e) => {
-                        const v = Math.min(parseInt(e.target.value,10,200))
+                        const v = Math.min(parseInt(e.target.value,10),200)
                         setBulkMint(v, 10)}
                      } />
                     <button disabled={!canOneClick} className='btn btn-primary btn-sm' onClick={handleOneClick}>
