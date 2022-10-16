@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import toast from "react-hot-toast"
+import { useNumber } from "react-use"
 import { useRecoilValue } from "recoil"
 import { useContractWrite } from "wagmi"
 import { useXenContract } from "../hooks/useXenContract"
@@ -7,14 +8,15 @@ import { useXenWitchContract, useXenWitchOp } from "../hooks/useXenWitchContract
 import { MinDonate } from "../store"
 
 export function RemintPanel(props) {
-    const { emptyList,refetchAddressStatus } = props
+    const { emptyList, refetchAddressStatus } = props
     const [times, setTimes] = useState(1)
-    const [term, setTerm] = useState(1)
+    const [term, setTerm] = useState(0)
     const xenWitchContract = useXenWitchContract()
     const globalMinDonate = useRecoilValue(MinDonate)
     const [, , functionCallAll] = useXenWitchOp()
     const xenContract = useXenContract()
-    const [mintLoading,setMintLoading] = useState(false)
+    const [mintLoading, setMintLoading] = useState(false)
+    const [startTerm, { set: setStartTerm }] = useNumber(1, null, 1)
 
     const { writeAsync } = useContractWrite({
         mode: "recklesslyUnprepared",
@@ -26,34 +28,47 @@ export function RemintPanel(props) {
     })
 
     const hanldeChangeTimes = (e) => {
-        const max =  Math.min(emptyList.length, 500);
-        const value = Math.min(Math.max(e.target.value, 1),max)
+        const max = Math.min(emptyList.length, 500);
+        const value = Math.min(Math.max(e.target.value, 1), max)
         setTimes(value)
     }
     const handleChangeTerm = (e) => {
-        const value = Math.max(e.target.value, 1)
+        const value = Math.max(e.target.value, 0)
         setTerm(value)
     }
 
     const handleMint = () => {
         if (!times || !term) return
         const list = emptyList.slice(0, times)
-        const contractData = xenContract.contractInterface.encodeFunctionData('claimRank', [term])
-        const data = list.map(item => {
-            return {
-                id:item.id,
-                value: 0,
-                to: xenContract.addressOrName,
-                data: contractData
-            }
-        })
+        let data;
+        if (term === 0) {
+            let start =  Number.isNaN(startTerm) ? 1 : startTerm
+            data = list.map(item => {
+                return {
+                    id: item.id,
+                    value: 0,
+                    to: xenContract.addressOrName,
+                    data: xenContract.contractInterface.encodeFunctionData('claimRank', [start])
+                }
+            })
+        } else {
+            const contractData = xenContract.contractInterface.encodeFunctionData('claimRank', [term])
+            data = list.map(item => {
+                return {
+                    id: item.id,
+                    value: 0,
+                    to: xenContract.addressOrName,
+                    data: contractData
+                }
+            })
+        }
         setMintLoading(true)
         writeAsync({
             recklesslySetUnpreparedArgs: [data]
-        }).then(async(tx) => tx.wait).catch(err=>{
+        }).then(async (tx) => tx.wait).catch(err => {
             toast.error(err?.error?.message ?? err?.message)
             return refetchAddressStatus()
-        }).finally(()=>{
+        }).finally(() => {
             setMintLoading(false)
         })
     }
@@ -61,7 +76,7 @@ export function RemintPanel(props) {
         <input type="checkbox" id="remint-model" className="modal-toggle" />
         <div className="modal">
             <div className="modal-box relative" >
-                <label htmlFor="remint-model" className="btn btn-sm btn-circle absolute right-2 top-2" style={{display:mintLoading?'none':''}}>✕</label>
+                <label htmlFor="remint-model" className="btn btn-sm btn-circle absolute right-2 top-2" style={{ display: mintLoading ? 'none' : '' }}>✕</label>
                 <h3 className="text-lg font-bold">已有地址重Mint</h3>
                 <div className="py-4">
                     你当前有{emptyList.length}个地址未Mint，点击下方按钮进行Mint。
@@ -84,8 +99,15 @@ export function RemintPanel(props) {
                             <span className="label-text">锁定时间</span>
                             <span className="label-text-alt">天数</span>
                         </label>
-                        <input type="number" min={1} className="input input-bordered w-full  input-sm" onChange={handleChangeTerm} value={term} />
+                        <input type="number" min={0} className="input input-bordered w-full  input-sm" onChange={handleChangeTerm} value={term} />
                     </div>
+                    {term == 0 && <div className="form-control w-full ">
+                        <label className="label">
+                            <span className="label-text">起始时间点</span>
+                            <span className="label-text-alt">天数</span>
+                        </label>
+                        <input type="number" min={1} className="input input-bordered w-full  input-sm" onChange={(e) => setStartTerm(parseInt(e.target.value, 10))} value={startTerm} />
+                    </div>}
                     <div className="form-control w-full mt-4">
                         <button className='btn btn-primary' onClick={handleMint}>
                             进行批量Mint攻击 (Witch Mint)
