@@ -62,7 +62,7 @@ export function MintedList() {
     const emptyList = useMemo(() => {
         if (data) {
             return data.filter(
-                (u) => u && u["maturityTs"].eq(0)
+                (u) => u && u["maturityTs"]?.eq(0)
             );
         }
         return [];
