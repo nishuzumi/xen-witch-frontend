@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import React, { useEffect, useMemo, useState } from 'react';
 import toast, { Toaster } from "react-hot-toast";
 import { RecoilRoot, useRecoilState } from "recoil";
+import { useNumber } from 'react-use';
 import {
   chain,
   configureChains,
