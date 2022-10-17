@@ -117,8 +117,7 @@ function Page() {
   const provider = useProvider();
   const [__, setGlobalMinDonate] = useRecoilState(MinDonate);
   const { addressOrName: contractAddress, contractInterface: XenWitchInterface } = useXenWitchContract()
-  const [functionMint, , functionCallAll] = useXenWitchOp()
-  const [startTerm, { set: setStartTerm }] = useNumber(1, null, 1)
+  const [functionMint] = useXenWitchOp()
 
 
   const contract = useMemo(() => {
@@ -175,42 +174,12 @@ function Page() {
     args: [amount, term],
   });
 
-  const { writeAsync: writeAsyncTermZero } = useContractWrite({
-    enable: term == 0,
-    mode: "recklesslyUnprepared",
-    addressOrName: contractAddress,
-    contractInterface: XenWitchInterface,
-    functionName: functionCallAll,
-  });
-
   const hanldeMint = async () => {
-    if (term == 0) {
-      writeAsync(overrides).then(() => {
-        toast.success("已提交");
-      }).catch((err) => {
-        toast.error(err?.error?.message ?? err?.message + '\n' + err?.data?.message)
-      });
-    } else {
-      let start = Number.isNaN(startTerm) ? 1 : startTerm
-      data = list.map(item => {
-        return {
-          id: item.id,
-          value: 0,
-          to: xenContract.addressOrName,
-          data: xenContract.contractInterface.encodeFunctionData('claimRank', [start])
-        }
-      })
-
-      writeAsyncTermZero({
-        recklesslySetUnpreparedArgs: [data]
-      }).then(async (tx) => {
-        toast.success("已提交");
-        return tx.wait()
-      }).catch(err => {
-        toast.error(err?.error?.message ?? err?.message)
-      })
-    }
-
+    writeAsync().then(() => {
+      toast.success("已提交");
+    }).catch((err) => {
+      toast.error(err?.error?.message ?? err?.message + '\n' + err?.data?.message)
+    });
   };
 
   const allReady = useMemo(() => {
@@ -254,17 +223,7 @@ function Page() {
                 <span className="label-text-alt">天数</span>
               </label>
               <input type="number" min={0} value={term} onChange={handleSetTerm} className="input input-bordered w-full max-w-xs input-sm" />
-              <label className="label">
-                <span className="label-text">如果为0，则为递增模式，比如数量是4，那么会有四个地址依次mint时间为1,2,3,4天锁定。</span>
-              </label>
             </div>
-            {term == 0 && <div className="form-control w-full ">
-              <label className="label">
-                <span className="label-text">起始时间点</span>
-                <span className="label-text-alt">天数</span>
-              </label>
-              <input type="number" min={1} className="input input-bordered w-full  input-sm" onChange={(e) => setStartTerm(parseInt(e.target.value, 10))} value={startTerm} />
-            </div>}
             <div className="divider" />
             <div className="form-control w-full max-w-xs">
               <button onClick={hanldeMint} className='btn btn-primary'>
