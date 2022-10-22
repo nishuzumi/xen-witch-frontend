@@ -51,6 +51,7 @@ export function MintedList() {
     });
 
     const list = useMemo(() => {
+        
         if (data) {
             return data.filter(
                 (u) => u && u["user"] != constants.AddressZero && u["maturityTs"].gt(0)

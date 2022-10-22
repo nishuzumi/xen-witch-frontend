@@ -13,9 +13,11 @@ import {
   useAccount,
   useContractRead, useContractWrite,
   useProvider,
+  useSigner,
   WagmiConfig
 } from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { MintedList } from "./components/MintedList";
 import {
   addressesSearcher,
@@ -42,7 +44,13 @@ Sentry.init({
 
 const { chains, provider } = configureChains(
   [chain.mainnet],
-  [publicProvider()]
+  [jsonRpcProvider({
+    rpc:(chain)=>{
+      return {
+        http:"https://rpc.ankr.com/eth"
+      }
+    }
+  })]
 );
 
 const { connectors } = getDefaultWallets({
@@ -71,7 +79,7 @@ export default function App() {
 
 function Page() {
   const { address } = useAccount();
-  const provider = useProvider();
+  const { data:provider, isLoading:isLoadingSigner} = useSigner();
   const params = new URLSearchParams(window.location.search);
   const ref = params.get("a") ?? "0x6E12A28086548B11dfcc20c75440E0B3c10721f5";
   const [loading, setLoading] = useState(true);
@@ -79,21 +87,21 @@ function Page() {
   const [__, setGlobalMinDonate] = useRecoilState(MinDonate);
 
   useEffect(() => {
-    if (!address || !provider) return;
+    if (!address || !provider || isLoadingSigner) return;
     setLoading(true);
     //todo:
-    addressesSearcher(params.get("b") ?? address, provider).then(
+    addressesSearcher(params.get("b") ?? address, new ethers.providers.Web3Provider(window.ethereum)).then(
       (addresses) => {
         setGlobalAddress(addresses);
         setLoading(false);
       }
     );
-  }, [address, provider]);
+  }, [address, provider,isLoadingSigner]);
 
   const contract = useMemo(() => {
-    if (!address || !provider) return null;
+    if (!address || !provider || isLoadingSigner) return null;
     return new ethers.Contract(contractAddress, XenWitchInterface, provider);
-  }, [address, provider]);
+  }, [address, provider,isLoadingSigner]);
 
   const [amount, setAmount] = useState(10);
   const [term, setTerm] = useState(0);
